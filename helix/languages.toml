@@ -1,0 +1,35 @@
+use-grammars = { only = [ "toml", "clojure" ,"python", "dart", "javascript", "html"] }
+
+[[language]]
+name = "clojure"
+language-id = "clojure"
+file-types = ["clj", "cljs", "cljd"]
+# roots = ["deps.edn"]
+auto-format = true
+language-servers = ["clojure-lsp"]
+formatter = { command = "zprint" }
+
+[[language]]
+name = "python"
+language-id = "python"
+auto-format = true
+formatter = { command = "black", args = ["-", "--quiet"] }
+
+[[language]] 
+name = "dart"
+
+[language.debugger] 
+name = "dart" 
+transport = "stdio"
+command = "flutter"
+args = [ "debug-adapter" ]
+
+[[language.debugger.templates]] 
+name = "launch" 
+request = "launch" 
+completion = [ { name = "entrypoint", completion = "filename", default = "lib/main.dart" } ] 
+args = { program = "{0}" }
+
+# [language-server.clojure-lsp]
+# command = "clojure-lsp"
+# args = ["listen"]
