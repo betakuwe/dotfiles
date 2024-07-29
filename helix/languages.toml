@@ -5,6 +5,11 @@ use-grammars = { only = [
   "dart",
   "javascript",
   "html",
+  "c",
+  "cpp",
+  "bash",
+  "cmake",
+  "md",
 ] }
 
 # [[language]]
@@ -17,13 +22,29 @@ use-grammars = { only = [
 # formatter = { command = "zprint" }
 
 [[language]]
+name = "c"
+language-id = "c"
+language-servers = [ "clangd-12" ]
+
+[[language]]
+name = "cpp"
+language-id = "cpp"
+language-servers = [ "clangd-12" ]
+roots = [ ".git", "CMakeLists.txt" ]
+
+[language-server.clangd-12]
+command = "clangd-12"
+args = [ "--enable-config" ]
+# config = { fallbackflags = [ "-DUNIT_TESTING" ] }
+
+[[language]]
 name = "python"
 language-id = "python"
-auto-format = true
 formatter = { command = "black", args = ["-", "--quiet"] }
 
 [[language]]
 name = "dart"
+roots = [ "pubspec.yaml" ]
 
 [language.debugger]
 name = "dart"
