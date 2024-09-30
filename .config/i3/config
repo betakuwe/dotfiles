@@ -34,7 +34,7 @@ exec --no-startup-id nm-applet
 exec --no-startup-id setxkbmap -option ctrl:nocaps && xcape -e 'Control_L=Escape'
 
 # Start redshift
-exec --no-startup-id redshift -P -O 4500
+exec --no-startup-id redshift -P -O 4000
 
 # Use pactl to adjust volume in PulseAudio.
 set $refresh_i3status killall -SIGUSR1 i3status
