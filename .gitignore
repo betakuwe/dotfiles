@@ -1,0 +1,5 @@
+*
+!.config/helix/config.toml
+!.config/helix/languages.toml
+!.config/zellij/config.kdl
+!.config/i3/config

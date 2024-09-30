@@ -1,0 +1,65 @@
+use-grammars = { only = [
+  "toml",
+  "clojure",
+  "python",
+  "dart",
+  "javascript",
+  "html",
+  "c",
+  "cpp",
+  "bash",
+  "cmake",
+  "md",
+] }
+
+[[language]]
+name = "clojure"
+language-id = "clojure"
+file-types = ["clj", "cljs", "cljd", "edn"]
+roots = ["deps.edn"]
+auto-format = true
+language-servers = ["clojure-lsp"]
+# formatter = { command = "zprint" }
+
+[[language]]
+name = "c"
+language-id = "c"
+language-servers = [ "clangd-12" ]
+
+[[language]]
+name = "cpp"
+language-id = "cpp"
+language-servers = [ "clangd-12" ]
+roots = [ ".git", "CMakeLists.txt" ]
+
+[language-server.clangd-12]
+command = "clangd-12"
+args = [ "--enable-config" ]
+# config = { fallbackflags = [ "-DUNIT_TESTING" ] }
+
+[[language]]
+name = "python"
+language-id = "python"
+formatter = { command = "black", args = ["-", "--quiet"] }
+
+[[language]]
+name = "dart"
+roots = [ "pubspec.yaml" ]
+
+[language.debugger]
+name = "dart"
+transport = "stdio"
+command = "flutter"
+args = ["debug-adapter"]
+
+[[language.debugger.templates]]
+name = "launch"
+request = "launch"
+completion = [
+  { name = "entrypoint", completion = "filename", default = "lib/main.dart" },
+]
+args = { program = "{0}" }
+
+[language-server.clojure-lsp]
+command = "clojure-lsp"
+args = ["listen"]
