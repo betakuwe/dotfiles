@@ -36,6 +36,9 @@ exec --no-startup-id setxkbmap -option ctrl:nocaps && xcape -e 'Control_L=Escape
 # Start redshift
 exec --no-startup-id redshift -P -O 4000
 
+# Set refresh rate to 165Hz
+#exec --no-startup-id xrandr --output DP-2 --mode 2560x1440 --rate 165.00
+
 # Use pactl to adjust volume in PulseAudio.
 set $refresh_i3status killall -SIGUSR1 i3status
 bindsym XF86AudioRaiseVolume exec --no-startup-id pactl set-sink-volume @DEFAULT_SINK@ +10% && $refresh_i3status
@@ -109,6 +112,10 @@ bindsym $mod+a focus parent
 # focus the child container
 #bindsym $mod+d focus child
 
+# Move the current workspace to the next output
+# (effectively toggles when you only have two outputs)
+bindsym $mod+x move workspace to output next
+
 # Define names for default workspaces for which we configure key bindings later on.
 # We use variables to avoid repeating the names in multiple places.
 set $ws1 "1"
@@ -179,6 +186,31 @@ mode "resize" {
 }
 
 bindsym $mod+r mode "resize"
+
+# control panel for brightness and volume
+mode "control" {
+        # Mute audio
+        bindsym m exec --no-startup-id pactl set-sink-mute @DEFAULT_SINK@ toggle && $refresh_i3status
+        bindsym n exec --no-startup-id pactl set-source-mute @DEFAULT_SOURCE@ toggle && $refresh_i3status
+
+        bindsym h exec --no-startup-id brightnessctl set 10-
+        bindsym j exec --no-startup-id pactl set-sink-volume @DEFAULT_SINK@ -10% && $refresh_i3status
+        bindsym k exec --no-startup-id pactl set-sink-volume @DEFAULT_SINK@ +10% && $refresh_i3status
+        bindsym l exec --no-startup-id brightnessctl set 10+
+
+        # same bindings, but for the arrow keys
+        bindsym Left exec --no-startup-id brightnessctl set 10-
+        bindsym Down exec --no-startup-id pactl set-sink-volume @DEFAULT_SINK@ -10% && $refresh_i3status
+        bindsym Up exec --no-startup-id pactl set-sink-volume @DEFAULT_SINK@ +10% && $refresh_i3status
+        bindsym Right exec --no-startup-id brightnessctl set 10+
+
+        # back to normal: Enter or Escape or $mod+r
+        bindsym Return mode "default"
+        bindsym Escape mode "default"
+        bindsym $mod+c mode "default"
+}
+
+bindsym $mod+c mode "control"
 
 # Catppuccin Latte
 set $rosewater #dc8a78
