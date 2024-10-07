@@ -44,11 +44,13 @@ exec --no-startup-id redshift -P -O 4000
 exec --no-startup-id xrandr --output DP-2 --mode 2560x1440 --rate 165.00
 
 # Use pactl to adjust volume in PulseAudio.
-set $refresh_i3status killall -SIGUSR1 i3status
-bindsym XF86AudioRaiseVolume exec --no-startup-id pactl set-sink-volume @DEFAULT_SINK@ +10% && $refresh_i3status
-bindsym XF86AudioLowerVolume exec --no-startup-id pactl set-sink-volume @DEFAULT_SINK@ -10% && $refresh_i3status
-bindsym XF86AudioMute exec --no-startup-id pactl set-sink-mute @DEFAULT_SINK@ toggle && $refresh_i3status
-bindsym XF86AudioMicMute exec --no-startup-id pactl set-source-mute @DEFAULT_SOURCE@ toggle && $refresh_i3status
+set $refresh_i3blocks_volume pkill -SIGRTMIN+10 i3blocks
+set $refresh_i3blocks_mic pkill -SIGRTMIN+9 i3blocks
+
+bindsym XF86AudioRaiseVolume exec --no-startup-id pactl set-sink-volume @DEFAULT_SINK@ +10% && $refresh_i3blocks_volume
+bindsym XF86AudioLowerVolume exec --no-startup-id pactl set-sink-volume @DEFAULT_SINK@ -10% && $refresh_i3blocks_volume
+bindsym XF86AudioMute exec --no-startup-id pactl set-sink-mute @DEFAULT_SINK@ toggle && $refresh_i3blocks_volume
+bindsym XF86AudioMicMute exec --no-startup-id pactl set-source-mute @DEFAULT_SOURCE@ toggle && $refresh_i3blocks_mic
 
 # Use Mouse+$mod to drag floating windows to their wanted position
 floating_modifier $mod
@@ -192,20 +194,24 @@ mode "resize" {
 bindsym $mod+r mode "resize"
 
 # control panel for brightness and volume
-mode "control" {
+set $control "h ☀ | j 🔈 | k 🔊 | l 🔅 | m 🔇 | n 🎤 u ▼ i ▲"
+mode $control {
         # Mute audio
-        bindsym m exec --no-startup-id pactl set-sink-mute @DEFAULT_SINK@ toggle && $refresh_i3status
-        bindsym n exec --no-startup-id pactl set-source-mute @DEFAULT_SOURCE@ toggle && $refresh_i3status
+        bindsym m exec --no-startup-id pactl set-sink-mute @DEFAULT_SINK@ toggle && $refresh_i3blocks_volume
+        bindsym n exec --no-startup-id pactl set-source-mute @DEFAULT_SOURCE@ toggle && $refresh_i3blocks_mic
+
+        bindsym u exec --no-startup-id pactl set-source-volume @DEFAULT_SOURCE@ -10% && $refresh_i3blocks_mic
+        bindsym i exec --no-startup-id pactl set-source-volume @DEFAULT_SOURCE@ +10% && $refresh_i3blocks_mic
 
         bindsym h exec --no-startup-id brightnessctl set 10-
-        bindsym j exec --no-startup-id pactl set-sink-volume @DEFAULT_SINK@ -10% && $refresh_i3status
-        bindsym k exec --no-startup-id pactl set-sink-volume @DEFAULT_SINK@ +10% && $refresh_i3status
+        bindsym j exec --no-startup-id pactl set-sink-volume @DEFAULT_SINK@ -10% && $refresh_i3blocks_volume
+        bindsym k exec --no-startup-id pactl set-sink-volume @DEFAULT_SINK@ +10% && $refresh_i3blocks_volume
         bindsym l exec --no-startup-id brightnessctl set 10+
 
         # same bindings, but for the arrow keys
         bindsym Left exec --no-startup-id brightnessctl set 10-
-        bindsym Down exec --no-startup-id pactl set-sink-volume @DEFAULT_SINK@ -10% && $refresh_i3status
-        bindsym Up exec --no-startup-id pactl set-sink-volume @DEFAULT_SINK@ +10% && $refresh_i3status
+        bindsym Down exec --no-startup-id pactl set-sink-volume @DEFAULT_SINK@ -10% && $refresh_i3blocks_volume
+        bindsym Up exec --no-startup-id pactl set-sink-volume @DEFAULT_SINK@ +10% && $refresh_i3blocks_volume
         bindsym Right exec --no-startup-id brightnessctl set 10+
 
         # back to normal: Enter or Escape or $mod+r
@@ -214,7 +220,7 @@ mode "control" {
         bindsym $mod+c mode "default"
 }
 
-bindsym $mod+c mode "control"
+bindsym $mod+c mode $control
 
 # Catppuccin Latte
 set $rosewater #dc8a78

@@ -10,6 +10,7 @@ use-grammars = { only = [
   "bash",
   "cmake",
   "md",
+  "bash",
 ] }
 
 [[language]]
@@ -41,6 +42,11 @@ args = [ "--enable-config" ]
 name = "python"
 language-id = "python"
 formatter = { command = "black", args = ["-", "--quiet"] }
+
+[[language]]
+name = "bash"
+language-id = "bash"
+formatter = { command = "shfmt" }
 
 [[language]]
 name = "dart"
