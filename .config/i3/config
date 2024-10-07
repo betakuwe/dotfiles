@@ -30,6 +30,10 @@ font pango:IosevkaTerm Nerd Font Mono 8
 # and nm-applet is a desktop environment-independent system tray GUI for it.
 exec --no-startup-id nm-applet
 
+# For screenshotting
+exec --no-startup-id flameshot
+bindsym Print exec flameshot gui
+
 # Make caps lock behave like Ctrl/Esc
 exec --no-startup-id setxkbmap -option ctrl:nocaps && xcape -e 'Control_L=Escape'
 
@@ -37,7 +41,7 @@ exec --no-startup-id setxkbmap -option ctrl:nocaps && xcape -e 'Control_L=Escape
 exec --no-startup-id redshift -P -O 4000
 
 # Set refresh rate to 165Hz
-#exec --no-startup-id xrandr --output DP-2 --mode 2560x1440 --rate 165.00
+exec --no-startup-id xrandr --output DP-2 --mode 2560x1440 --rate 165.00
 
 # Use pactl to adjust volume in PulseAudio.
 set $refresh_i3status killall -SIGUSR1 i3status
@@ -253,7 +257,7 @@ bar {
         # Display i3bar only when $mod key held down
         mode hide
 
-        status_command i3status
+        status_command i3blocks
 
         colors {
             background         $base
