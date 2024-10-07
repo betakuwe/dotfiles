@@ -194,7 +194,7 @@ mode "resize" {
 bindsym $mod+r mode "resize"
 
 # control panel for brightness and volume
-set $control "h ☀ | j 🔈 | k 🔊 | l 🔅 | m 🔇 | n 🎤 u ▼ i ▲"
+set $control "h 🔅 | j 🔈 | k 🔊 | l 🔆 | m 🔇 | n 🎤 u ▼ i ▲"
 mode $control {
         # Mute audio
         bindsym m exec --no-startup-id pactl set-sink-mute @DEFAULT_SINK@ toggle && $refresh_i3blocks_volume
