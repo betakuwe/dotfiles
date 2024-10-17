@@ -16,7 +16,7 @@ use-grammars = { only = [
 [[language]]
 name = "clojure"
 language-id = "clojure"
-file-types = ["clj", "cljs", "cljd", "edn"]
+file-types = ["cljc", "clj", "cljs", "cljd", "edn"]
 roots = ["deps.edn"]
 auto-format = true
 language-servers = ["clojure-lsp"]
