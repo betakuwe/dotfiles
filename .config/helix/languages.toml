@@ -11,7 +11,44 @@ use-grammars = { only = [
   "cmake",
   "md",
   "bash",
+  "futhark",
+  "scheme"
 ] }
+
+# Steel Scheme
+
+[[language]]
+name = "scheme"
+# language-id = "scheme"
+scope = "source.scheme"
+file-types = ["scm"]
+language-servers = ["steel"]
+
+[language-server.steel]
+command = "steel-language-server"
+args = []
+
+# Futhark
+
+[[language]]
+name = "futhark"
+language-id = "futhark"
+scope = "source.futhark"
+file-types = ["fut"]
+indent = { tab-width = 2, unit = "  " }
+comment-tokens = ["--"]
+language-servers = ["futhark"]
+grammar = "futhark"
+
+[language-server.futhark]
+command = "futhark"
+args = ["lsp"]
+
+[[grammar]]
+name = "futhark"
+source = { git = "https://github.com/wstevick/tree-sitter-futhark", rev = "22a55ba7dfef1dd7bbb2b0ccfe46be550519a5e1" }
+
+# Clojure
 
 [[language]]
 name = "clojure"
@@ -21,6 +58,10 @@ roots = ["deps.edn"]
 auto-format = true
 language-servers = ["clojure-lsp"]
 # formatter = { command = "zprint" }
+
+[language-server.clojure-lsp]
+command = "clojure-lsp"
+args = ["listen"]
 
 [[language]]
 name = "c"
@@ -41,6 +82,7 @@ args = [ "--enable-config" ]
 [[language]]
 name = "python"
 language-id = "python"
+file-types = ["py", "bend"]
 formatter = { command = "black", args = ["-", "--quiet"] }
 
 [[language]]
@@ -66,6 +108,3 @@ completion = [
 ]
 args = { program = "{0}" }
 
-[language-server.clojure-lsp]
-command = "clojure-lsp"
-args = ["listen"]
