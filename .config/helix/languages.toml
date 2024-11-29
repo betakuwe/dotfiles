@@ -39,6 +39,7 @@ indent = { tab-width = 2, unit = "  " }
 comment-tokens = ["--"]
 language-servers = ["futhark"]
 grammar = "futhark"
+formatter = { command = "futhark", args = ["fmt"] }
 
 [language-server.futhark]
 command = "futhark"
