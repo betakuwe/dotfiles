@@ -1,4 +1,3 @@
-set -o vi
 alias fd='flutter devices'
 alias zll='zellij ls'
 alias zla='zellij a'
