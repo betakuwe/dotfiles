@@ -1,4 +1,3 @@
-alias fd='flutter devices'
 alias zll='zellij ls'
 alias zla='zellij a'
 alias zld='zellij d'
