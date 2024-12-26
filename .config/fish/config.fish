@@ -20,4 +20,9 @@ if status is-interactive
 
     # set fzf plugin to show hidden files and gitignore files
     set fzf_fd_opts --hidden --no-ignore
+
+    # use bat as man pager
+    if type --query bat
+        set --export MANPAGER "sh -c 'col -bx | bat -l man -p'"
+    end
 end
