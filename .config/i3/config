@@ -36,7 +36,7 @@ exec --no-startup-id flameshot
 bindsym Print exec flameshot gui
 
 # Make caps lock behave like Ctrl/Esc
-# exec --no-startup-id setxkbmap -option ctrl:nocaps && xcape -e 'Control_L=Escape'
+exec --no-startup-id setxkbmap -option ctrl:nocaps && xcape -e 'Control_L=Escape'
 
 # Start redshift
 exec --no-startup-id redshift -P -O 4000
