@@ -12,7 +12,8 @@ use-grammars = { only = [
   "md",
   "bash",
   "futhark",
-  "scheme"
+  "scheme",
+  "fish"
 ] }
 
 # Steel Scheme
@@ -93,7 +94,12 @@ formatter = { command = "shfmt" }
 
 [[language]]
 name = "dart"
+language-servers = [ "fvm-dart" ]
 roots = [ "pubspec.yaml" ]
+
+[language-server.fvm-dart]
+command = "fvm"
+args = ["dart", "language-server"]
 
 [language.debugger]
 name = "dart"

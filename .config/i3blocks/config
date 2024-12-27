@@ -36,13 +36,13 @@ markup=none
 # See the script for details.
 
 [mic]
-command=./mic_info.sh
+command=~/.config/i3blocks/mic_info.sh
 label=🎤
 interval=1
 signal=9
 
 [volume]
-command=./audio_info.sh
+command=~/.config/i3blocks/audio_info.sh
 label=🔊
 interval=1
 signal=10

@@ -19,7 +19,7 @@ center = ["version-control"]
 right = ["diagnostics", "selections", "register", "position", "total-line-numbers", "position-percentage", "file-encoding", "file-type"]
 
 [editor.file-picker]
-# hidden = false
+hidden = false
 
 [editor.lsp]
 display-inlay-hints = true
@@ -52,3 +52,4 @@ S-tab = "extend_parent_node_start"
 
 [keys.normal.space]
 "space" = ":format"
+"l" = ":lsp-workspace-command"
