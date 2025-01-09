@@ -45,4 +45,13 @@ if status is-interactive
     abbr --add ffr fvm flutter run
     abbr --add dbrb fvm dart run build_runner build
     abbr --add dbrw fvm dart run build_runner watch
+    abbr --add gs git status
+    abbr --add gpr git pull --rebase
+    abbr --add gss git stash
+    abbr --add gsp git stash pop
+    abbr --add gca git commit -am
+    abbr --add gcm git commit -m
+    abbr --add gco git checkout
+    abbr --add gbl git branch --list
+    abbr --add gmf git merge --ff-only
 end
