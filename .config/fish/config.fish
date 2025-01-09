@@ -10,7 +10,7 @@ if status is-interactive
 
     # set ls color theme to catppuccin latte
     if type --query vivid # requires vivid installed
-        set --export LS_COLORS (vivid generate catppuccin-latte)
+        set --export --universal LS_COLORS (vivid generate catppuccin-latte)
     end
 
     # helix on arch linux isn't hx, so set alias if hx isn't found
@@ -23,6 +23,26 @@ if status is-interactive
 
     # use bat as man pager
     if type --query bat
-        set --export MANPAGER "sh -c 'col -bx | bat -l man -p'"
+        set --export --universal MANPAGER "sh -c 'col -bx | bat -l man -p'"
     end
+
+    # abbreviations
+    abbr --add l ls -C --classify
+    abbr --add la ls --almost-all
+    abbr --add ll ls --all -l --classify --human-readable
+    abbr --add ls ls --color=auto
+    abbr --add chgrp chgrp --preserve-root
+    abbr --add chmod chmod --preserve-root
+    abbr --add chown chown --preserve-root
+    abbr --add zll zellij list-sessions
+    abbr --add zla zellij attach
+    abbr --add zld zellij delete-session
+    abbr --add cljd clj -M:cljd
+    abbr --add info info --vi-keys
+    abbr --add flutter fvm flutter
+    abbr --add dart fvm dart
+    abbr --add ffd fvm flutter devices
+    abbr --add ffr fvm flutter run
+    abbr --add dbrb fvm dart run build_runner build
+    abbr --add dbrw fvm dart run build_runner watch
 end
