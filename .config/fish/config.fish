@@ -1,6 +1,5 @@
 if status is-interactive
     # Commands to run in interactive sessions can go here
-    source ~/.bash_aliases
 
     # vi mode
     fish_vi_key_bindings
@@ -15,7 +14,7 @@ if status is-interactive
 
     # helix on arch linux isn't hx, so set alias if hx isn't found
     if not type --query hx; and type --query helix
-        alias hx=helix
+        abbr --add hx helix
     end
 
     # set fzf plugin to show hidden files and gitignore files
@@ -37,6 +36,7 @@ if status is-interactive
     abbr --add zll zellij list-sessions
     abbr --add zla zellij attach
     abbr --add zld zellij delete-session
+    abbr --add zljs zellij --session
     abbr --add cljd clj -M:cljd
     abbr --add info info --vi-keys
     abbr --add flutter fvm flutter
