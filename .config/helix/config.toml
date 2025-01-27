@@ -12,6 +12,7 @@ rulers = [81, 101, 121]
 bufferline = "multiple"
 color-modes = true
 jump-label-alphabet = "fjdkslaruvneicmwoxpzqghtyb"
+end-of-line-diagnostics = "hint"
 
 [editor.statusline]
 left = ["mode", "spinner", "file-name", "read-only-indicator", "file-modification-indicator"]
@@ -33,7 +34,10 @@ enable = true
 [editor.cursor-shape]
 insert = "bar"
 normal = "block"
-select = "underline"
+select = "block"
+
+[editor.inline-diagnostics]
+cursor-line = "warning"
 
 [keys.normal]
 tab = "move_parent_node_end"
@@ -49,6 +53,7 @@ S-tab = "move_parent_node_start"
 [keys.select]
 tab = "extend_parent_node_end"
 S-tab = "extend_parent_node_start"
+Y = "yank_joined"
 
 [keys.normal.space]
 "space" = ":format"

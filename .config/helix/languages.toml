@@ -13,7 +13,8 @@ use-grammars = { only = [
   "bash",
   "futhark",
   "scheme",
-  "fish"
+  "fish",
+  "gleam"
 ] }
 
 # Steel Scheme
