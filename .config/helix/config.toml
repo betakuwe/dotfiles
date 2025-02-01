@@ -1,14 +1,14 @@
-theme = "catppuccin_latte"
+theme = "transparent"
 
 [editor]
 line-number = "relative"
 scroll-lines = 1
-cursorline = true
+# cursorline = true
 true-color = true
 auto-format = false
 completion-timeout = 5
 completion-trigger-len = 1
-rulers = [81, 101, 121]
+# rulers = [81, 101, 121]
 bufferline = "multiple"
 color-modes = true
 jump-label-alphabet = "fjdkslaruvneicmwoxpzqghtyb"

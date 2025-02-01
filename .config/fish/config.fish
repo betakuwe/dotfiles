@@ -61,4 +61,9 @@ if status is-interactive
     abbr --add gco git checkout
     abbr --add gbl git branch --list
     abbr --add gmf git merge --ff-only
+
+    # completions
+    complete -c zellij -f
+    complete -c zellij -n "__fish_seen_subcommand_from attach kill-session delete-session action" \
+        -a "(zellij list-sessions | cut -d' ' -f1 | sed 's/\x1b\[[0-9;]*m//g')"
 end
