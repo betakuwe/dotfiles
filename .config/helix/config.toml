@@ -46,6 +46,9 @@ G = ":reset-diff-change"
 A-x = "select_line_above"
 C-w = ":buffer-close"
 Y = "yank_joined"
+H = "goto_previous_buffer"
+L = "goto_next_buffer"
+"ret" = "goto_word"
 
 [keys.insert]
 S-tab = "move_parent_node_start"
@@ -54,6 +57,9 @@ S-tab = "move_parent_node_start"
 tab = "extend_parent_node_end"
 S-tab = "extend_parent_node_start"
 Y = "yank_joined"
+H = "goto_previous_buffer"
+L = "goto_next_buffer"
+"ret" = "goto_word"
 
 [keys.normal.space]
 "space" = ":format"
