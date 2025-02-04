@@ -14,17 +14,22 @@ use-grammars = { only = [
   "futhark",
   "scheme",
   "fish",
-  "gleam"
+  "gleam",
 ] }
+
+# TOML
+[[language]]
+name = "toml"
+formatter = { command = "taplo", args = ["format", "-"] }
 
 # Fish
 [[language]]
 name = "fish"
-language-servers = [ "fish-lsp" ]
+language-servers = ["fish-lsp"]
 
 [language-server.fish-lsp]
 command = "fish-lsp"
-args= ["start"]
+args = ["start"]
 environment = { "fish_lsp_show_client_popups" = "false" }
 
 # Steel Scheme
@@ -79,17 +84,17 @@ args = ["listen"]
 [[language]]
 name = "c"
 language-id = "c"
-language-servers = [ "clangd-12" ]
+language-servers = ["clangd-12"]
 
 [[language]]
 name = "cpp"
 language-id = "cpp"
-language-servers = [ "clangd-12" ]
-roots = [ ".git", "CMakeLists.txt" ]
+language-servers = ["clangd-12"]
+roots = [".git", "CMakeLists.txt"]
 
 [language-server.clangd-12]
 command = "clangd-12"
-args = [ "--enable-config" ]
+args = ["--enable-config"]
 # config = { fallbackflags = [ "-DUNIT_TESTING" ] }
 
 [[language]]
@@ -105,8 +110,8 @@ formatter = { command = "shfmt" }
 
 [[language]]
 name = "dart"
-language-servers = [ "fvm-dart" ]
-roots = [ "pubspec.yaml" ]
+language-servers = ["fvm-dart"]
+roots = ["pubspec.yaml"]
 
 [language-server.fvm-dart]
 command = "fvm"
@@ -125,4 +130,3 @@ completion = [
   { name = "entrypoint", completion = "filename", default = "lib/main.dart" },
 ]
 args = { program = "{0}" }
-

@@ -15,9 +15,24 @@ jump-label-alphabet = "fjdkslaruvneicmwoxpzqghtyb"
 end-of-line-diagnostics = "hint"
 
 [editor.statusline]
-left = ["mode", "spinner", "file-name", "read-only-indicator", "file-modification-indicator"]
+left = [
+  "mode",
+  "spinner",
+  "file-name",
+  "read-only-indicator",
+  "file-modification-indicator",
+]
 center = ["version-control"]
-right = ["diagnostics", "selections", "register", "position", "total-line-numbers", "position-percentage", "file-encoding", "file-type"]
+right = [
+  "diagnostics",
+  "selections",
+  "register",
+  "position",
+  "total-line-numbers",
+  "position-percentage",
+  "file-encoding",
+  "file-type",
+]
 
 [editor.file-picker]
 hidden = false
