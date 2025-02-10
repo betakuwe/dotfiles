@@ -42,8 +42,8 @@ exec --no-startup-id setxkbmap -option ctrl:nocaps && xcape -e 'Control_L=Escape
 exec --no-startup-id redshift -P -O 4000
 
 # set bg and compositor
-exec --no-startup-id feh --bg-fill ~/Pictures/clouds-2.png
-exec --no-startup-id picom -CGb --blur-background
+exec --no-startup-id feh --bg-fill ~/Pictures/white-cat-stare.jpg
+exec --no-startup-id picom -CGb
 
 # Set refresh rate to 165Hz
 exec --no-startup-id xrandr --output DP-2 --mode 2560x1440 --rate 165.00
