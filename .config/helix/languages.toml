@@ -15,7 +15,13 @@ use-grammars = { only = [
   "scheme",
   "fish",
   "gleam",
+  "awk",
 ] }
+
+# TOML
+[[language]]
+name = "awk"
+formatter = { command = "awk", args = ["-o-", "-f", "-"] }
 
 # TOML
 [[language]]

@@ -3,6 +3,8 @@ if status is-interactive
 
     # vi mode
     fish_vi_key_bindings
+    # helix mode
+    # fish_helix_key_bindings
 
     # reduce delay to enter normal mode
     set fish_escape_delay_ms 10
