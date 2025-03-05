@@ -27,8 +27,6 @@ if status is-interactive
         set --export --universal MANPAGER "sh -c 'col -bx | bat -l man -p'"
     end
 
-    source /home/local/KLASS/benjamin.tan/.config/helix/hx.fish
-
     # activate npm on terminal start up
     if type --query nvm
         nvm --silent use latest
