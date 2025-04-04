@@ -11,7 +11,7 @@ if status is-interactive
 
     # set ls color theme to catppuccin latte
     if type --query vivid # requires vivid installed
-        set --export --universal LS_COLORS (vivid generate catppuccin-latte)
+        set --export --global LS_COLORS (vivid generate catppuccin-latte)
     end
 
     # helix on arch linux isn't hx, so set alias if hx isn't found
@@ -24,12 +24,17 @@ if status is-interactive
 
     # use bat as man pager
     if type --query bat
-        set --export --universal MANPAGER "sh -c 'col -bx | bat -l man -p'"
+        set --export --global MANPAGER "sh -c 'col -bx | bat -l man -p'"
     end
 
     # activate npm on terminal start up
     if type --query nvm
         nvm --silent use latest
+    end
+
+    # set copy command
+    if string match --quiet x11 $XDG_SESSION_TYPE; and type --query xclip
+        abbr --add copy xclip -selection c
     end
 
     # abbreviations

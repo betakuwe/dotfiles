@@ -42,7 +42,7 @@ bindsym Print exec --nostartup-id flameshot gui
 exec --no-startup-id redshift -P -O 4000
 
 # set bg and compositor
-exec --no-startup-id feh --bg-fill ~/Pictures/white-cat-stare.jpg
+exec --no-startup-id feh --bg-fill ~/Pictures/grumpy_cat.png
 exec --no-startup-id picom -CGb
 
 # Set refresh rate to 165Hz
@@ -60,6 +60,11 @@ bindsym XF86AudioMicMute exec --no-startup-id pactl set-source-mute @DEFAULT_SOU
 # Use Mouse+$mod to drag floating windows to their wanted position
 floating_modifier $mod
 
+
+# my scripts lol
+bindsym $mod+o exec /home/local/KLASS/benjamin.tan/scripts/automove.sh start
+bindsym $mod+p exec /home/local/KLASS/benjamin.tan/scripts/automove.sh stop
+
 # start a terminal
 # bindsym $mod+Return exec i3-sensible-terminal
 bindsym $mod+Return exec /home/local/KLASS/benjamin.tan/.local/bin/alacritty
@@ -72,7 +77,8 @@ bindsym $mod+Shift+q kill
 # There also is the (new) i3-dmenu-desktop which only displays applications
 # shipping a .desktop file. It is a wrapper around dmenu, so you need that
 # installed.
-bindsym $mod+d exec --no-startup-id i3-dmenu-desktop
+# bindsym $mod+d exec --no-startup-id i3-dmenu-desktop
+bindsym $mod+d exec --no-startup-id rofi -show drun
 
 # change focus
 bindsym $mod+h focus left
