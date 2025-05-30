@@ -17,7 +17,7 @@ set $mod Mod4
 
 # This font is widely installed, provides lots of unicode glyphs, right-to-left
 # text rendering and scalability on retina/hidpi displays (thanks to pango).
-font pango:FantasqueSansM Nerd Font Propo 8
+font pango:Maple Mono 8
 
 # The combination of xss-lock, nm-applet and pactl is a popular choice, so
 # they are included here as an example. Modify as you see fit.
@@ -62,8 +62,8 @@ floating_modifier $mod
 
 
 # my scripts lol
-bindsym $mod+o exec /home/local/KLASS/benjamin.tan/scripts/automove.sh start
-bindsym $mod+p exec /home/local/KLASS/benjamin.tan/scripts/automove.sh stop
+bindsym $mod+m exec --no-startup-id /usr/local/bin/emacs
+
 
 # start a terminal
 # bindsym $mod+Return exec i3-sensible-terminal
@@ -78,7 +78,7 @@ bindsym $mod+Shift+q kill
 # shipping a .desktop file. It is a wrapper around dmenu, so you need that
 # installed.
 # bindsym $mod+d exec --no-startup-id i3-dmenu-desktop
-bindsym $mod+d exec --no-startup-id rofi -show drun
+bindsym $mod+d exec --no-startup-id rofi -show drun -font "Maple Mono 16"
 
 # change focus
 bindsym $mod+h focus left

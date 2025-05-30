@@ -18,6 +18,7 @@ use-grammars = { only = [
   "awk",
   "elixir",
   "prolog",
+  "janet",
 ] }
 
 # so that pl files are not perl but prolog
@@ -47,6 +48,15 @@ formatter = { command = "taplo", args = ["format", "-"] }
 # [[language]]
 # name = "heex"
 # language-servers = ["lexical"]
+
+# Janet
+[[language]]
+name = "janet"
+language-servers = ["janet-lsp"]
+
+[language-server.janet-lsp]
+command = "janet-lsp"
+args = ["--stdio"]
 
 # Fish
 [[language]]

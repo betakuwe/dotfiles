@@ -2,7 +2,7 @@ if status is-interactive
     # Commands to run in interactive sessions can go here
 
     # vi mode
-    fish_vi_key_bindings
+    # fish_vi_key_bindings
     # helix mode
     # fish_helix_key_bindings
 
@@ -38,34 +38,36 @@ if status is-interactive
     end
 
     # abbreviations
-    abbr --add l ls -C --classify
-    abbr --add la ls --almost-all
-    abbr --add ll ls --all -l --classify --human-readable
-    abbr --add ls ls --color=auto
-    abbr --add chgrp chgrp --preserve-root
-    abbr --add chmod chmod --preserve-root
-    abbr --add chown chown --preserve-root
-    abbr --add zll zellij list-sessions
-    abbr --add zla zellij attach
-    abbr --add zld zellij delete-session
-    abbr --add zljs zellij --session
-    abbr --add cljd clj -M:cljd
-    abbr --add info info --vi-keys
-    abbr --add flutter fvm flutter
-    abbr --add dart fvm dart
-    abbr --add ffd fvm flutter devices
-    abbr --add ffr fvm flutter run
-    abbr --add dbrb fvm dart run build_runner build
-    abbr --add dbrw fvm dart run build_runner watch
-    abbr --add gs git status
-    abbr --add gpr git pull --rebase
-    abbr --add gss git stash
-    abbr --add gsp git stash pop
-    abbr --add gca git commit -am
-    abbr --add gcm git commit -m
-    abbr --add gco git checkout
-    abbr --add gbl git branch --list
-    abbr --add gmf git merge --ff-only
+    abbr --add -- l ls -C --classify
+    abbr --add -- la ls --almost-all
+    abbr --add -- ll ls --all -l --classify --human-readable
+    abbr --add -- ls ls --color=auto
+    abbr --add -- chgrp chgrp --preserve-root
+    abbr --add -- chmod chmod --preserve-root
+    abbr --add -- chown chown --preserve-root
+    abbr --add -- zll zellij list-sessions
+    abbr --add -- zla zellij attach
+    abbr --add -- zld zellij delete-session
+    abbr --add -- zljs zellij --session
+    abbr --add -- cljd clj -M:cljd
+    abbr --add -- info info --vi-keys
+    abbr --add -- flutter fvm flutter
+    abbr --add -- dart fvm dart
+    abbr --add -- ffd fvm flutter devices
+    abbr --add -- ffr fvm flutter run
+    abbr --add -- dbrb fvm dart run build_runner build
+    abbr --add -- dbrw fvm dart run build_runner watch
+    abbr --add -- gs git status
+    abbr --add -- gpr git pull --rebase
+    abbr --add -- gss git stash
+    abbr --add -- gsp git stash pop
+    abbr --add -- gca git commit -am
+    abbr --add -- gcm git commit -m
+    abbr --add -- gco git checkout
+    abbr --add -- gbl git branch --list
+    abbr --add -- gmf git merge --ff-only
+    abbr --add -- fd fdfind
+    abbr --add -- lg lazygit
 
     # completions
     complete -c zellij -f
