@@ -1,5 +1,7 @@
 ;;; post-init.el --- DESCRIPTION -*- no-byte-compile: t; lexical-binding: t; -*-
 
+(use-package magit)
+
 (use-package ligature
   :config
   ;; Enable the "www" ligature in every possible major mode
@@ -69,20 +71,32 @@
   ;; per mode with `ligature-mode'.
   (global-ligature-mode t))
 
-;; Enable soft wrap
-(global-visual-line-mode -1)
+;; Font type
+;; [WARN] Won't work if system cannot render this font
+(set-face-attribute 'default nil :font "Maple Mono")
 
-;; Font type and size
-(set-face-attribute 'default nil
-                    ;; :font "ComicShannsMono Nerd Font"
-                    :font "Maple Mono"
-                    ;; smaller size if on high resolution screen
-                    :height (if (> (x-display-pixel-width) 2560) 75 100))
+;; Set text height
+(defun set-height-by-system-name-and-display ()
+  (thread-last
+    (cond
+     ;; On macbook air
+     ((equal (system-name) "Benjamins-Air") 150)
+     ;; On work laptop
+     ((if (> (x-display-pixel-width) 2560) 75 100)))
+    (set-face-attribute 'default nil :height)))
 
-;; (load "rose-pine-dawn-theme.el")
+(set-height-by-system-name-and-display)
+
+;; Supposedly this should call the height setting function when the display monitor changes.
+;; [TODO] Test this, I don't know if this works.
+(setq display-monitors-changed-functions #'set-height-by-system-name-and-display)
+
+;; (set-face-attribute 'default nil :height (get-height-by-system-name-and-display))
+
 ;; Set colour theme
-(setq catppuccin-flavor 'latte)
-(load-theme 'catppuccin :no-confirm)
+(use-package catppuccin-theme
+  :custom (catppuccin-flavor 'latte)
+  :config (load-theme 'catppuccin :no-confirm))
 
 ;; line numbers
 (global-display-line-numbers-mode 1)
@@ -92,34 +106,38 @@
 
 ;; Set emacs' path variable
 (use-package exec-path-from-shell
-  :ensure t
   :config
   (exec-path-from-shell-initialize))
 
-;; Enable lispy mode for relevant modes
-(dolist (mode-hook '(emacs-lisp-mode-hook
-                     lisp-mode-hook
-                     clojure-mode-hook
-                     clojurec-mode-hook
-                     clojurescript-mode-hook
-                     clojuredart-mode-hook
-                     clojurec-mode-hook))
-  (add-hook mode-hook (lambda () (lispy-mode 1))))
-
 (use-package lispy
-  :custom
+  :config
   ;; Prevent lispy from overwriting goto function
   (define-key lispy-mode-map (kbd "M-.") nil)
-  (setq lispy-compat '(edebug cider magit-blame-mode)))
+  (setq lispy-compat '(edebug cider magit-blame-mode))
+  ;; Enable lispy mode for relevant modes
+  :hook (lisp-mode-hook
+         emacs-lisp-mode-hook
+         clojure-mode-hook
+         clojurescript-mode-hook
+         clojuredart-mode-hook
+         clojurec-mode-hook))
 
 ;; Splits horizontally (left-right) when this value is below window width
 (setq split-width-threshold 80)
 
+(use-package avy
+  :bind ("C-:" . 'avy-goto-char))
+
+(use-package ace-window
+  :custom (aw-keys '(?f ?d ?s ?a ?k ?l ?h ?g))
+  :bind ("C-x o" . 'ace-window))
+
 ;; Bigger active screen
 (use-package golden-ratio
-  :custom
-  (golden-ratio-mode 1)
-  (setq golden-ratio-max-width 80))
+  :after ace-window
+  :config
+  (add-to-list 'golden-ratio-extra-commands 'ace-window)
+  (golden-ratio-mode 1))
 
 (use-package corfu
   ;; Optional customizations
@@ -217,109 +235,110 @@
   (savehist-mode))
 
 (use-package orderless
-  :ensure t
   :custom
   (completion-styles '(flex orderless basic)) ; flex enables fuzzy finding
   (completion-category-defaults nil)
   (completion-category-overrides '((file (styles basic partial-completion)))))
 
-(defun meow-setup ()
-  (setq meow-cheatsheet-layout meow-cheatsheet-layout-qwerty)
-  (meow-motion-overwrite-define-key
-   '("j" . meow-next)
-   '("k" . meow-prev)
-   '("<escape>" . ignore))
-  (meow-leader-define-key
-   ;; Use SPC (0-9) for digit arguments.
-   '("1" . meow-digit-argument)
-   '("2" . meow-digit-argument)
-   '("3" . meow-digit-argument)
-   '("4" . meow-digit-argument)
-   '("5" . meow-digit-argument)
-   '("6" . meow-digit-argument)
-   '("7" . meow-digit-argument)
-   '("8" . meow-digit-argument)
-   '("9" . meow-digit-argument)
-   '("0" . meow-digit-argument)
-   '("/" . meow-keypad-describe-key)
-   '("?" . meow-cheatsheet))
-  (meow-normal-define-key
-   '("0" . meow-expand-0)
-   '("9" . meow-expand-9)
-   '("8" . meow-expand-8)
-   '("7" . meow-expand-7)
-   '("6" . meow-expand-6)
-   '("5" . meow-expand-5)
-   '("4" . meow-expand-4)
-   '("3" . meow-expand-3)
-   '("2" . meow-expand-2)
-   '("1" . meow-expand-1)
-   '("-" . negative-argument)
-   '(";" . meow-reverse)
-   '("," . meow-inner-of-thing)
-   '("." . meow-bounds-of-thing)
-   '("[" . meow-beginning-of-thing)
-   '("]" . meow-end-of-thing)
-   '("a" . meow-append)
-   '("A" . meow-open-below)
-   '("b" . meow-back-word)
-   '("B" . meow-back-symbol)
-   '("c" . meow-change)
-   '("d" . meow-delete)
-   '("D" . meow-backward-delete)
-   '("e" . meow-next-word)
-   '("E" . meow-next-symbol)
-   '("f" . meow-find)
-   '("g" . meow-cancel-selection)
-   '("G" . meow-grab)
-   '("h" . meow-left)
-   '("H" . meow-left-expand)
-   '("i" . meow-insert)
-   '("I" . meow-open-above)
-   '("j" . meow-next)
-   '("J" . meow-next-expand)
-   '("k" . meow-prev)
-   '("K" . meow-prev-expand)
-   '("l" . meow-right)
-   '("L" . meow-right-expand)
-   '("m" . meow-join)
-   '("n" . meow-search)
-   '("o" . meow-block)
-   '("O" . meow-to-block)
-   '("p" . meow-yank)
-   '("q" . meow-quit)
-   '("Q" . meow-goto-line)
-   '("r" . meow-replace)
-   '("R" . meow-swap-grab)
-   '("s" . meow-kill)
-   '("t" . meow-till)
-   '("u" . meow-undo)
-   '("U" . meow-undo-in-selection)
-   '("v" . meow-visit)
-   '("w" . meow-mark-word)
-   '("W" . meow-mark-symbol)
-   '("x" . meow-line)
-   '("X" . meow-goto-line)
-   '("y" . meow-save)
-   '("Y" . meow-sync-grab)
-   '("z" . meow-pop-selection)
-   '("'" . repeat)
-   '("<escape>" . ignore)))
-(require 'meow)
-(meow-setup)
-(meow-global-mode 1)
 
-(require 'meow-tree-sitter)
-(meow-tree-sitter-register-defaults)
+
+(use-package meow
+  :config
+  (defun meow-setup ()
+    (setq meow-cheatsheet-layout meow-cheatsheet-layout-qwerty)
+    (meow-motion-overwrite-define-key
+     '("j" . meow-next)
+     '("k" . meow-prev)
+     '("<escape>" . ignore))
+    (meow-leader-define-key
+     ;; Use SPC (0-9) for digit arguments.
+     '("1" . meow-digit-argument)
+     '("2" . meow-digit-argument)
+     '("3" . meow-digit-argument)
+     '("4" . meow-digit-argument)
+     '("5" . meow-digit-argument)
+     '("6" . meow-digit-argument)
+     '("7" . meow-digit-argument)
+     '("8" . meow-digit-argument)
+     '("9" . meow-digit-argument)
+     '("0" . meow-digit-argument)
+     '("/" . meow-keypad-describe-key)
+     '("?" . meow-cheatsheet))
+    (meow-normal-define-key
+     '("0" . meow-expand-0)
+     '("9" . meow-expand-9)
+     '("8" . meow-expand-8)
+     '("7" . meow-expand-7)
+     '("6" . meow-expand-6)
+     '("5" . meow-expand-5)
+     '("4" . meow-expand-4)
+     '("3" . meow-expand-3)
+     '("2" . meow-expand-2)
+     '("1" . meow-expand-1)
+     '("-" . negative-argument)
+     '(";" . meow-reverse)
+     '("," . meow-inner-of-thing)
+     '("." . meow-bounds-of-thing)
+     '("[" . meow-beginning-of-thing)
+     '("]" . meow-end-of-thing)
+     '("a" . meow-append)
+     '("A" . meow-open-below)
+     '("b" . meow-back-word)
+     '("B" . meow-back-symbol)
+     '("c" . meow-change)
+     '("d" . meow-delete)
+     '("D" . meow-backward-delete)
+     '("e" . meow-next-word)
+     '("E" . meow-next-symbol)
+     '("f" . meow-find)
+     '("g" . meow-cancel-selection)
+     '("G" . meow-grab)
+     '("h" . meow-left)
+     '("H" . meow-left-expand)
+     '("i" . meow-insert)
+     '("I" . meow-open-above)
+     '("j" . meow-next)
+     '("J" . meow-next-expand)
+     '("k" . meow-prev)
+     '("K" . meow-prev-expand)
+     '("l" . meow-right)
+     '("L" . meow-right-expand)
+     '("m" . meow-join)
+     '("n" . meow-search)
+     '("o" . meow-block)
+     '("O" . meow-to-block)
+     '("p" . meow-yank)
+     '("q" . meow-quit)
+     '("Q" . meow-goto-line)
+     '("r" . meow-replace)
+     '("R" . meow-swap-grab)
+     '("s" . meow-kill)
+     '("t" . meow-till)
+     '("u" . meow-undo)
+     '("U" . meow-undo-in-selection)
+     '("v" . meow-visit)
+     '("w" . meow-mark-word)
+     '("W" . meow-mark-symbol)
+     '("x" . meow-line)
+     '("X" . meow-goto-line)
+     '("y" . meow-save)
+     '("Y" . meow-sync-grab)
+     '("z" . meow-pop-selection)
+     '("'" . repeat)
+     '("<escape>" . ignore)))
+  (meow-setup)
+  (meow-global-mode 1))
+
+(use-package meow-tree-sitter
+  :after meow
+  :config
+  (meow-tree-sitter-register-defaults))
 
 (use-package marginalia
-  :ensure t
   :config
   (marginalia-mode))
 
 (use-package embark
-  :ensure t
-
   :bind
   (("C-." . embark-act)         ;; pick some comfortable binding
    ("C-;" . embark-dwim)        ;; good alternative: M-.
@@ -349,17 +368,13 @@
 
 ;; Consult users will also want the embark-consult package.
 (use-package embark-consult
-  :ensure t ; only need to install it, embark loads it after consult if found
   :hook
   (embark-collect-mode . consult-preview-at-point-mode))
 
 ;; surround functions
 (use-package surround
-  :ensure t
   :bind-keymap ("C-c s" . surround-keymap))
 
-(keymap-global-set "C-v" 'golden-ratio-scroll-screen-up)
-(keymap-global-set "M-v" 'golden-ratio-scroll-screen-down)
 (keymap-global-set "C-c r" 'recentf)
 (keymap-global-set "C-c o" 'pop-global-mark)
 (keymap-global-set "C-c c" 'compile)
@@ -383,12 +398,17 @@
 (global-visual-line-mode 1)
 (keymap-unset visual-line-mode-map "C-k")
 
+(use-package format-all)
+
 (use-package diff-hl
-  :config '(magit)
+  :after magit
+  :config
+  (global-diff-hl-mode)
   :hook
-  (magit-post-refresh-hook . diff-hl-magit-post-refresh)
   (dired-mode . diff-hl-dired-mode)
-  :custom
-  (global-diff-hl-mode 1))
+  ((text-mode prog-mode) . diff-hl-flydiff-mode)
+  (magit-post-refresh . diff-hl-magit-post-refresh))
+
+(use-package cider)
 
 (message "Welcome!")
