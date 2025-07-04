@@ -35,6 +35,100 @@
     ;; A global mode that compiles .el files before they are loaded.
     (compile-angel-on-load-mode)))
 
+;; Allows hiding or customising minor modes in the modeline
+(use-package delight)
+
+(defvar my-space-mode-map (make-sparse-keymap "SPACE"))
+
+(define-minor-mode my-space-mode
+  "SPACE"
+  :global t)
+
+(use-package evil
+  :custom
+  (evil-want-C-u-scroll t)
+  (evil-want-keybinding nil)
+  (evil-search-module #'evil-search)
+  (evil-magic 'very-magic)
+  :bind
+  ("C-k" . 'evil-window-up)
+  ("C-j" . 'evil-window-down)
+  ("C-h" . 'evil-window-left)
+  ("C-l" . 'evil-window-right)
+  ;; I don't use insert digraph (the default binding)
+  ;; Use C-k for moving up in vertico and corfu
+  (:map evil-insert-state-map ("C-k" . nil))
+  :config
+  (evil-mode 1)
+  (dolist (state '(normal visual))
+    (evil-make-intercept-map
+     (evil-get-auxiliary-keymap my-space-mode-map state t t)
+     state))
+  (evil-define-key '(normal visual) 'global " " my-space-mode-map)
+  ;; (evil-define-key '(normal visual) 'global " " 'space-map)
+  (evil-define-key '(normal visual) 'global "s" 'avy-goto-char-2))
+
+(use-package evil-visualstar
+  :after evil
+  :config (global-evil-visualstar-mode))
+
+(use-package evil-collection
+  :after evil
+  :delight (evil-collection-unimpaired-mode)
+  :custom (evil-collection-setup-minibuffer t)
+  :hook
+  (evil-collection-setup
+   .
+   (lambda (_mode mode-keymaps &rest _)
+     ;; (evil-collection-define-key '(normal visual) 'dired-mode-map " " 'space-map)
+     ;; (evil-collection-define-key '(normal visual) 'Man-mode-map " " 'space-map)
+     (evil-collection-translate-key 'normal  mode-keymaps
+       "SPC" nil)
+     (evil-collection-define-key '(normal visual) 'compilation-mode-map
+       "J" 'compilation-next-error
+       "K" 'compilation-previous-error
+       "C-j" nil
+       "C-k" nil)))
+  :config
+  (evil-collection-init))
+
+(use-package evil-commentary
+  :after evil
+  :delight
+  :config (evil-commentary-mode))
+
+(use-package evil-indent-plus
+  :after evil
+  :config (evil-indent-plus-default-bindings))
+
+(use-package evil-surround
+  :after evil
+  :config (global-evil-surround-mode 1))
+
+                                        ;Don't know yet if i want to use this
+;; (use-package evil-textobj-tree-sitter
+;;   :after evil
+;;   :config
+;;   ;; bind `function.outer`(entire function block) to `f` for use in things like `vaf`, `yaf`
+;; (define-key evil-outer-text-objects-map "f" (evil-textobj-tree-sitter-get-textobj "function.outer"))
+;; ;; bind `function.inner`(function block without name and args) to `f` for use in things like `vif`, `yif`
+;; (define-key evil-inner-text-objects-map "f" (evil-textobj-tree-sitter-get-textobj "function.inner"))
+;; ;; You can also bind multiple items and we will match the first one we can find
+;; (define-key evil-outer-text-objects-map "a" (evil-textobj-tree-sitter-get-textobj ("conditional.outer" "loop.outer"))))
+
+;; (use-package evil-lispy
+;;   :after evil
+;;   :hook
+;;   (lisp-mode
+;;    lisp-interaction-mode
+;;    emacs-lisp-mode
+;;    clojure-mode
+;;    clojurescript-mode
+;;    clojuredart-mode
+;;    clojurec-mode
+;;    cider-repl-mode))
+
+
 ;; Auto-revert in Emacs is a feature that automatically updates the
 ;; contents of a buffer to reflect changes made to the underlying file
 ;; on disk.
@@ -71,7 +165,7 @@
   ;; `variable-pitch' face supports it
   ;; (ligature-set-ligatures 'eww-mode '("ff" "fi" "ffi"))
   ;; Enable Maple Mono ligatures in programming modes
-  (ligature-set-ligatures 't ;; 'prog-mode
+  (ligature-set-ligatures 'prog-mode
                           '(;; == === ==== => =| =>>=>=|=>==>> ==< =/=//=// =~
                             ;; =:= =!=
                             ("=" (rx (+ (or ">" "<" "|" "/" "~" ":" "!" "="))))
@@ -171,26 +265,26 @@
   :config
   (exec-path-from-shell-initialize))
 
-(use-package lispy
-                                        ; :vc (:url "https://github.com/enzuru/lispy"
-                                        ;           :branch "master")
-  :config
-  ;; Prevent lispy from overwriting goto function
-  (define-key lispy-mode-map (kbd "M-.") nil)
-  (setq lispy-compat '(edebug cider magit-blame-mode))
-  ;; Enable lispy mode for relevant modes
-  :hook
-  (lisp-mode
-   lisp-interaction-mode
-   emacs-lisp-mode
-   clojure-mode
-   clojurescript-mode
-   clojuredart-mode
-   clojurec-mode
-   cider-repl-mode))
+;; (use-package lispy
+;;                                         ; :vc (:url "https://github.com/enzuru/lispy"
+;;                                         ;           :branch "master")
+;;   :config
+;;   ;; Prevent lispy from overwriting goto function
+;;   (define-key lispy-mode-map (kbd "M-.") nil)
+;;   (setq lispy-compat '(edebug cider magit-blame-mode))
+;;   ;; Enable lispy mode for relevant modes
+;;   :hook
+;;   (lisp-mode
+;;    lisp-interaction-mode
+;;    emacs-lisp-mode
+;;    clojure-mode
+;;    clojurescript-mode
+;;    clojuredart-mode
+;;    clojurec-mode
+;;    cider-repl-mode))
 
 ;; Splits horizontally (left-right) when this value is below window width
-(setq split-width-threshold 80)
+(setq split-width-threshold 100)
 
 (use-package avy
   :bind ("C-:" . 'avy-goto-char))
@@ -201,15 +295,21 @@
 
 ;; Bigger active screen
 (use-package golden-ratio
-  :after ace-window
+  :after ace-window evil
   :delight
   :config
   (add-to-list 'golden-ratio-extra-commands 'ace-window)
+  (add-to-list 'golden-ratio-extra-commands 'evil-window-up)
+  (add-to-list 'golden-ratio-extra-commands 'evil-window-down)
+  (add-to-list 'golden-ratio-extra-commands 'evil-window-left)
+  (add-to-list 'golden-ratio-extra-commands 'evil-window-right)
   (golden-ratio-mode 1))
 
 (use-package corfu
   :commands (corfu-mode global-corfu-mode)
   ;; Optional customizations
+  :bind (:map corfu-map
+              ("RET" . nil))
   :custom
   (corfu-auto t)
   (corfu-cycle t) ;; Enable cycling for `corfu-next/previous'
@@ -225,11 +325,6 @@
   ;; Disable Ispell completion function. As an alternative try `cape-dict'.
   (text-mode-ispell-word-completion nil)
   (tab-always-indent 'complete)
-
-  ;; Enable Corfu only for certain modes. See also `global-corfu-modes'.
-  :hook ((prog-mode . corfu-mode)
-         (shell-mode . corfu-mode)
-         (eshell-mode . corfu-mode))
 
   :init
   (setq global-corfu-minibuffer
@@ -251,7 +346,7 @@
   :commands (cape-dabbrev cape-file cape-elisp-block)
   ;; Bind prefix keymap providing all Cape commands under a mnemonic key.
   ;; Press C-c p ? to for help.
-  :bind ("C-c p" . cape-prefix-map) ;; Alternative key: M-<tab>, M-p, M-+
+  ;; :bind ("C-c p" . cape-prefix-map) ;; Alternative key: M-<tab>, M-p, M-+
   ;; Alternatively bind Cape commands individually.
   ;; :bind (("C-c p d" . cape-dabbrev)
   ;;        ("C-c p h" . cape-history)
@@ -269,6 +364,7 @@
   ;; ...
   )
 
+;; Source: https://systemcrafters.net/live-streams/may-21-2021/
 (defun minibuffer-backward-kill (arg)
   "When minibuffer is completing a file name delete up to parent
 folder, otherwise delete a character backward"
@@ -288,7 +384,9 @@ folder, otherwise delete a character backward"
   (vertico-resize t) ;; Grow and shrink the Vertico minibuffer
   (vertico-cycle t)  ;; Enable cycling for `vertico-next/previous'
   :bind (:map minibuffer-local-map
-              ("<backspace>" . minibuffer-backward-kill))
+              ("<backspace>" . minibuffer-backward-kill)
+              ("C-j" . vertico-next)
+              ("C-k" . vertico-previous))
   :init
   (vertico-mode))
 
@@ -299,6 +397,7 @@ folder, otherwise delete a character backward"
   (visual-line-mode)
   (eldoc-mode)
   :custom
+
   ;; TAB cycle if there are only few candidates
   ;; (completion-cycle-threshold 3)
 
@@ -335,98 +434,6 @@ folder, otherwise delete a character backward"
   (completion-category-defaults nil)
   (completion-category-overrides '((file (styles basic partial-completion)))))
 
-;; (use-package meow
-;;   :config
-;;   (defun meow-setup ()
-;;     (setq meow-cheatsheet-layout meow-cheatsheet-layout-qwerty)
-;;     (meow-motion-overwrite-define-key
-;;      '("j" . meow-next)
-;;      '("k" . meow-prev)
-;;      '("<escape>" . ignore))
-;;     (meow-leader-define-key
-;;      ;; Use SPC (0-9) for digit arguments.
-;;      '("1" . meow-digit-argument)
-;;      '("2" . meow-digit-argument)
-;;      '("3" . meow-digit-argument)
-;;      '("4" . meow-digit-argument)
-;;      '("5" . meow-digit-argument)
-;;      '("6" . meow-digit-argument)
-;;      '("7" . meow-digit-argument)
-;;      '("8" . meow-digit-argument)
-;;      '("9" . meow-digit-argument)
-;;      '("0" . meow-digit-argument)
-;;      '("/" . meow-keypad-describe-key)
-;;      '("?" . meow-cheatsheet))
-;;     (meow-normal-define-key
-;;      '("0" . meow-expand-0)
-;;      '("9" . meow-expand-9)
-;;      '("8" . meow-expand-8)
-;;      '("7" . meow-expand-7)
-;;      '("6" . meow-expand-6)
-;;      '("5" . meow-expand-5)
-;;      '("4" . meow-expand-4)
-;;      '("3" . meow-expand-3)
-;;      '("2" . meow-expand-2)
-;;      '("1" . meow-expand-1)
-;;      '("-" . negative-argument)
-;;      '(";" . meow-reverse)
-;;      '("," . meow-inner-of-thing)
-;;      '("." . meow-bounds-of-thing)
-;;      '("[" . meow-beginning-of-thing)
-;;      '("]" . meow-end-of-thing)
-;;      '("a" . meow-append)
-;;      '("A" . meow-open-below)
-;;      '("b" . meow-back-word)
-;;      '("B" . meow-back-symbol)
-;;      '("c" . meow-change)
-;;      '("d" . meow-delete)
-;;      '("D" . meow-backward-delete)
-;;      '("e" . meow-next-word)
-;;      '("E" . meow-next-symbol)
-;;      '("f" . meow-find)
-;;      '("g" . meow-cancel-selection)
-;;      '("G" . meow-grab)
-;;      '("h" . meow-left)
-;;      '("H" . meow-left-expand)
-;;      '("i" . meow-insert)
-;;      '("I" . meow-open-above)
-;;      '("j" . meow-next)
-;;      '("J" . meow-next-expand)
-;;      '("k" . meow-prev)
-;;      '("K" . meow-prev-expand)
-;;      '("l" . meow-right)
-;;      '("L" . meow-right-expand)
-;;      '("m" . meow-join)
-;;      '("n" . meow-search)
-;;      '("o" . meow-block)
-;;      '("O" . meow-to-block)
-;;      '("p" . meow-yank)
-;;      '("q" . meow-quit)
-;;      '("Q" . meow-goto-line)
-;;      '("r" . meow-replace)
-;;      '("R" . meow-swap-grab)
-;;      '("s" . meow-kill)
-;;      '("t" . meow-till)
-;;      '("u" . meow-undo)
-;;      '("U" . meow-undo-in-selection)
-;;      '("v" . meow-visit)
-;;      '("w" . meow-mark-word)
-;;      '("W" . meow-mark-symbol)
-;;      '("x" . meow-line)
-;;      '("X" . meow-goto-line)
-;;      '("y" . meow-save)
-;;      '("Y" . meow-sync-grab)
-;;      '("z" . meow-pop-selection)
-;;      '("'" . repeat)
-;;      '("<escape>" . ignore)))
-;;   (meow-setup)
-;;   (meow-global-mode 1))
-
-;; (use-package meow-tree-sitter
-;;   :after meow
-;;   :config
-;;   (meow-tree-sitter-register-defaults))
-
 (use-package marginalia
   :commands (marginalia-mode marginalia-cycle)
   :hook (after-init . marginalia-mode)
@@ -450,7 +457,9 @@ folder, otherwise delete a character backward"
   :bind
   (("C-." . embark-act)         ;; pick some comfortable binding
    ("C-;" . embark-dwim)        ;; good alternative: M-.
-   ("C-h B" . embark-bindings)) ;; alternative for `describe-bindings'
+   )
+  (:map help-map
+        ("B" . embark-bindings)) ;; alternative for `describe-bindings'
 
   :init
   (setq prefix-help-command #'embark-prefix-help-command)
@@ -570,6 +579,9 @@ folder, otherwise delete a character backward"
   :config
   (add-to-list 'eglot-server-programs
                '((dart-mode dart-ts-mode) . ("fvm" "dart" "language-server")))
+  ;; (add-to-list 'eglot-server-programs
+  ;;              '((c-mode c-ts-mode c++-mode c++-ts-mode objc-mode)
+  ;;                . ("clangd")))
   ;; (cl-callf append
   ;;     eglot-server-programs '((dart-mode . ("fvm" "dart" "language-server"))
   ;;                             ;; ((c++-mode c++-ts-mode c-mode c-ts-mode) . ("clangd-12" "--enable-config"))
@@ -671,7 +683,9 @@ folder, otherwise delete a character backward"
   (helpful-max-buffers 7))
 
 ;; Prevent Emacs from saving customization information to a custom file
-(setq custom-file null-device)
+;; [TODO] fucks things up, maybe use make-temp-file instead
+;; (setq custom-file null-device)
+(setq custom-file (make-temp-file "emacs-custom"))
 
 ;; Allow Emacs to upgrade built-in packages, such as Org mode
 (setq package-install-upgrade-built-in t)
@@ -739,21 +753,6 @@ folder, otherwise delete a character backward"
 ;; expression for a cleaner display.
 (add-hook 'dired-mode-hook #'dired-hide-details-mode)
 
-;; Hide files from dired
-(setq dired-omit-files "." ;; (concat "\\`[.]\\'"
-      ;;         "\\|\\(?:\\.js\\)?\\.meta\\'"
-      ;;         "\\|\\.\\(?:elc|a\\|o\\|pyc\\|pyo\\|swp\\|class\\)\\'"
-      ;;         "\\|^\\.DS_Store\\'"
-      ;;         "\\|^\\.\\(?:svn\\|git\\)\\'"
-      ;;         "\\|^\\.ccls-cache\\'"
-      ;;         "\\|^__pycache__\\'"
-      ;;         "\\|^\\.project\\(?:ile\\)?\\'"
-      ;;         "\\|^flycheck_.*"
-      ;;         "\\|^flymake_.*")
-      )
-
-;; (add-hook 'dired-mode-hook #'dired-omit-mode)
-
 ;; Enables visual indication of minibuffer recursion depth after initialization.
 (add-hook 'after-init-hook #'minibuffer-depth-indicate-mode)
 
@@ -771,19 +770,7 @@ folder, otherwise delete a character backward"
 ;; NOTE: This may cause delayed syntax highlighting in certain cases
 (setq redisplay-skip-fontification-on-input t)
 
-;; surround functions
-(use-package surround
-  :bind-keymap ("C-c s" . surround-keymap))
-
-(keymap-global-set "C-c r" 'recentf)
-(keymap-global-set "C-c o" 'pop-global-mark)
-(keymap-global-set "C-c c" 'compile)
-(keymap-global-set "C-c u" 'flymake-goto-prev-error)
-(keymap-global-set "C-c i" 'flymake-goto-next-error)
-(keymap-global-set "C-c h" 'windmove-left)
-(keymap-global-set "C-c j" 'windmove-down)
-(keymap-global-set "C-c k" 'windmove-up)
-(keymap-global-set "C-c l" 'windmove-right)
+(setq compile-command "")
 
 (add-hook 'compilation-filter-hook 'ansi-color-compilation-filter)
 
@@ -798,7 +785,9 @@ folder, otherwise delete a character backward"
 (global-visual-line-mode 1)
 (keymap-unset visual-line-mode-map "C-k")
 
-(use-package format-all)
+(setq dired-kill-when-opening-new-dired-buffer t)
+
+;; (use-package format-all)
 
 (use-package diff-hl
   :after magit
@@ -813,8 +802,61 @@ folder, otherwise delete a character backward"
 
 (use-package dart-mode)
 
-;; Allows hiding or customising minor modes in the modeline
-(use-package delight)
+(use-package cmake-mode)
+
+(use-package dockerfile-mode)
+
+(use-package rainbow-delimiters
+  :hook prog-mode)
+
+(define-prefix-command 'file-map)
+(keymap-set file-map "c" 'compile)
+(keymap-set file-map "C" 'recompile)
+(keymap-set file-map "r" 'recentf)
+(keymap-set file-map "f" 'find-file)
+
+(define-prefix-command 'kill-map)
+(keymap-set kill-map "w" 'delete-window)
+(keymap-set kill-map "k" 'kill-buffer-and-window)
+(keymap-set kill-map "b" 'kill-current-buffer)
+
+;; (define-prefix-command 'my-space-mode-map)
+(keymap-set my-space-mode-map "p" project-prefix-map)
+(keymap-set my-space-mode-map "v" vc-prefix-map)
+(keymap-set my-space-mode-map "f" 'file-map)
+(keymap-set my-space-mode-map "k" 'kill-map)
+(keymap-set my-space-mode-map "c" mode-specific-map)
+(keymap-set my-space-mode-map "s" search-map)
+(keymap-set my-space-mode-map "h" help-map)
+(keymap-set my-space-mode-map "b" 'consult-buffer)
+(keymap-set my-space-mode-map "B" 'list-buffers)
+(keymap-set my-space-mode-map "SPC" 'eglot-format-buffer)
+(keymap-set my-space-mode-map "r" 'eglot-rename)
+;; (keymap-set my-space-mode-map "e" 'consult-flymake)
+;; (keymap-set my-space-mode-map "E" 'consult-compile-error)
+
+;; (define-prefix-command 'space-map)
+;; (keymap-set space-map "p" project-prefix-map)
+;; (keymap-set space-map "v" vc-prefix-map)
+;; (keymap-set space-map "f" 'file-map)
+;; (keymap-set space-map "k" 'kill-map)
+;; (keymap-set space-map "c" mode-specific-map)
+;; (keymap-set space-map "s" search-map)
+;; (keymap-set space-map "h" help-map)
+;; (keymap-set space-map "b" 'consult-buffer)
+;; (keymap-set space-map "B" 'list-buffers)
+;; (keymap-set space-map "SPC" 'eglot-format-buffer)
+;; (keymap-set space-map "r" 'eglot-rename)
+;; ;; (keymap-set space-map "e" 'consult-flymake)
+;; ;; (keymap-set space-map "E" 'consult-compile-error)
+
+;; [TODO] add hooks instead?
+(require 'backtrace)
+(dolist (mode-map (list help-mode-map backtrace-mode-map))
+  (keymap-set mode-map "SPC" 'space-map))
+
+;; (use-package comint
+;;   :custom (comint-buffer-maximum-size (* 1024 1024)))
 
 (defun display-startup-time ()
   "Display the startup time and number of garbage collections."

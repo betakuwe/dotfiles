@@ -51,3 +51,11 @@
 (package! catppuccin-theme)
 (package! ligature)
 (package! golden-ratio)
+
+(package! groovy-mode)
+
+(package! vc-jj)
+(package! jjdescription)
+
+(package! odin-ts-mode
+  :recipe (:host github :repo "Sampie159/odin-ts-mode"))

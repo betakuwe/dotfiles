@@ -116,4 +116,12 @@
 (after! orderless (add-to-list 'completion-styles 'flex))
 
 ;; Very magic regex in substitution mode
-(after! evil (setq evil-magic 'very-magic))
+(after! evil
+  (setq evil-magic 'very-magic)
+  (set-evil-initial-state! async-shell-command-mode 'normal))
+
+;; Don't pollute buffers with dired buffers
+(setq dired-kill-when-opening-new-dired-buffer t)
+
+;; No default compile command
+(setq compile-command "")
