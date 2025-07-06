@@ -204,14 +204,10 @@
 
 ;; Bigger active screen
 (use-package golden-ratio
-  :after ace-window evil
+  :after ace-window
   :delight
   :config
   (add-to-list 'golden-ratio-extra-commands 'ace-window)
-  (add-to-list 'golden-ratio-extra-commands 'evil-window-up)
-  (add-to-list 'golden-ratio-extra-commands 'evil-window-down)
-  (add-to-list 'golden-ratio-extra-commands 'evil-window-left)
-  (add-to-list 'golden-ratio-extra-commands 'evil-window-right)
   (golden-ratio-mode 1))
 
 (use-package corfu
