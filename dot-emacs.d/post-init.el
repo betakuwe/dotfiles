@@ -38,97 +38,6 @@
 ;; Allows hiding or customising minor modes in the modeline
 (use-package delight)
 
-(defvar my-space-mode-map (make-sparse-keymap "SPACE"))
-
-(define-minor-mode my-space-mode
-  "SPACE"
-  :global t)
-
-(use-package evil
-  :custom
-  (evil-want-C-u-scroll t)
-  (evil-want-keybinding nil)
-  (evil-search-module #'evil-search)
-  (evil-magic 'very-magic)
-  :bind
-  ("C-k" . 'evil-window-up)
-  ("C-j" . 'evil-window-down)
-  ("C-h" . 'evil-window-left)
-  ("C-l" . 'evil-window-right)
-  ;; I don't use insert digraph (the default binding)
-  ;; Use C-k for moving up in vertico and corfu
-  (:map evil-insert-state-map ("C-k" . nil))
-  :config
-  (evil-mode 1)
-  (dolist (state '(normal visual))
-    (evil-make-intercept-map
-     (evil-get-auxiliary-keymap my-space-mode-map state t t)
-     state))
-  (evil-define-key '(normal visual) 'global " " my-space-mode-map)
-  ;; (evil-define-key '(normal visual) 'global " " 'space-map)
-  (evil-define-key '(normal visual) 'global "s" 'avy-goto-char-2))
-
-(use-package evil-visualstar
-  :after evil
-  :config (global-evil-visualstar-mode))
-
-(use-package evil-collection
-  :after evil
-  :delight (evil-collection-unimpaired-mode)
-  :custom (evil-collection-setup-minibuffer t)
-  :hook
-  (evil-collection-setup
-   .
-   (lambda (_mode mode-keymaps &rest _)
-     ;; (evil-collection-define-key '(normal visual) 'dired-mode-map " " 'space-map)
-     ;; (evil-collection-define-key '(normal visual) 'Man-mode-map " " 'space-map)
-     (evil-collection-translate-key 'normal  mode-keymaps
-       "SPC" nil)
-     (evil-collection-define-key '(normal visual) 'compilation-mode-map
-       "J" 'compilation-next-error
-       "K" 'compilation-previous-error
-       "C-j" nil
-       "C-k" nil)))
-  :config
-  (evil-collection-init))
-
-(use-package evil-commentary
-  :after evil
-  :delight
-  :config (evil-commentary-mode))
-
-(use-package evil-indent-plus
-  :after evil
-  :config (evil-indent-plus-default-bindings))
-
-(use-package evil-surround
-  :after evil
-  :config (global-evil-surround-mode 1))
-
-                                        ;Don't know yet if i want to use this
-;; (use-package evil-textobj-tree-sitter
-;;   :after evil
-;;   :config
-;;   ;; bind `function.outer`(entire function block) to `f` for use in things like `vaf`, `yaf`
-;; (define-key evil-outer-text-objects-map "f" (evil-textobj-tree-sitter-get-textobj "function.outer"))
-;; ;; bind `function.inner`(function block without name and args) to `f` for use in things like `vif`, `yif`
-;; (define-key evil-inner-text-objects-map "f" (evil-textobj-tree-sitter-get-textobj "function.inner"))
-;; ;; You can also bind multiple items and we will match the first one we can find
-;; (define-key evil-outer-text-objects-map "a" (evil-textobj-tree-sitter-get-textobj ("conditional.outer" "loop.outer"))))
-
-;; (use-package evil-lispy
-;;   :after evil
-;;   :hook
-;;   (lisp-mode
-;;    lisp-interaction-mode
-;;    emacs-lisp-mode
-;;    clojure-mode
-;;    clojurescript-mode
-;;    clojuredart-mode
-;;    clojurec-mode
-;;    cider-repl-mode))
-
-
 ;; Auto-revert in Emacs is a feature that automatically updates the
 ;; contents of a buffer to reflect changes made to the underlying file
 ;; on disk.
@@ -384,9 +293,7 @@ folder, otherwise delete a character backward"
   (vertico-resize t) ;; Grow and shrink the Vertico minibuffer
   (vertico-cycle t)  ;; Enable cycling for `vertico-next/previous'
   :bind (:map minibuffer-local-map
-              ("<backspace>" . minibuffer-backward-kill)
-              ("C-j" . vertico-next)
-              ("C-k" . vertico-previous))
+              ("<backspace>" . minibuffer-backward-kill))
   :init
   (vertico-mode))
 
@@ -596,6 +503,7 @@ folder, otherwise delete a character backward"
 ;; including HTML, LaTeX, PDF, and Markdown.
 (use-package org
   :ensure t
+  :defer t
   :commands (org-mode org-version)
   :mode
   ("\\.org\\'" . org-mode)
@@ -798,65 +706,112 @@ folder, otherwise delete a character backward"
   ((text-mode prog-mode) . diff-hl-flydiff-mode)
   (magit-post-refresh . diff-hl-magit-post-refresh))
 
-(use-package cider)
+(use-package cider
+  :defer t)
 
-(use-package dart-mode)
+(use-package dart-mode
+  :defer t)
 
-(use-package cmake-mode)
+(use-package cmake-mode
+  :defer t)
 
-(use-package dockerfile-mode)
+(use-package dockerfile-mode
+  :defer t)
 
 (use-package rainbow-delimiters
   :hook prog-mode)
 
-(define-prefix-command 'file-map)
-(keymap-set file-map "c" 'compile)
-(keymap-set file-map "C" 'recompile)
-(keymap-set file-map "r" 'recentf)
-(keymap-set file-map "f" 'find-file)
+(use-package meow
+  :config
+  (defun meow-setup ()
+    (setq meow-cheatsheet-layout meow-cheatsheet-layout-qwerty)
+    (meow-motion-overwrite-define-key
+     '("j" . meow-next)
+     '("k" . meow-prev)
+     '("<escape>" . ignore))
+    (meow-leader-define-key
+     ;; Use SPC (0-9) for digit arguments.
+     '("1" . meow-digit-argument)
+     '("2" . meow-digit-argument)
+     '("3" . meow-digit-argument)
+     '("4" . meow-digit-argument)
+     '("5" . meow-digit-argument)
+     '("6" . meow-digit-argument)
+     '("7" . meow-digit-argument)
+     '("8" . meow-digit-argument)
+     '("9" . meow-digit-argument)
+     '("0" . meow-digit-argument)
+     '("/" . meow-keypad-describe-key)
+     '("?" . meow-cheatsheet))
+    (meow-normal-define-key
+     '("0" . meow-expand-0)
+     '("9" . meow-expand-9)
+     '("8" . meow-expand-8)
+     '("7" . meow-expand-7)
+     '("6" . meow-expand-6)
+     '("5" . meow-expand-5)
+     '("4" . meow-expand-4)
+     '("3" . meow-expand-3)
+     '("2" . meow-expand-2)
+     '("1" . meow-expand-1)
+     '("-" . negative-argument)
+     '(";" . meow-reverse)
+     '("," . meow-inner-of-thing)
+     '("." . meow-bounds-of-thing)
+     '("[" . meow-beginning-of-thing)
+     '("]" . meow-end-of-thing)
+     '("a" . meow-append)
+     '("A" . meow-open-below)
+     '("b" . meow-back-word)
+     '("B" . meow-back-symbol)
+     '("c" . meow-change)
+     '("d" . meow-delete)
+     '("D" . meow-backward-delete)
+     '("e" . meow-next-word)
+     '("E" . meow-next-symbol)
+     '("f" . meow-find)
+     '("g" . meow-cancel-selection)
+     '("G" . meow-grab)
+     '("h" . meow-left)
+     '("H" . meow-left-expand)
+     '("i" . meow-insert)
+     '("I" . meow-open-above)
+     '("j" . meow-next)
+     '("J" . meow-next-expand)
+     '("k" . meow-prev)
+     '("K" . meow-prev-expand)
+     '("l" . meow-right)
+     '("L" . meow-right-expand)
+     '("m" . meow-join)
+     '("n" . meow-search)
+     '("o" . meow-block)
+     '("O" . meow-to-block)
+     '("p" . meow-yank)
+     '("q" . meow-quit)
+     '("Q" . meow-goto-line)
+     '("r" . meow-replace)
+     '("R" . meow-swap-grab)
+     '("s" . meow-kill)
+     '("t" . meow-till)
+     '("u" . meow-undo)
+     '("U" . meow-undo-in-selection)
+     '("v" . meow-visit)
+     '("w" . meow-mark-word)
+     '("W" . meow-mark-symbol)
+     '("x" . meow-line)
+     '("X" . meow-goto-line)
+     '("y" . meow-save)
+     '("Y" . meow-sync-grab)
+     '("z" . meow-pop-selection)
+     '("'" . repeat)
+     '("<escape>" . ignore)))
+  (meow-setup)
+  (meow-global-mode 1))
 
-(define-prefix-command 'kill-map)
-(keymap-set kill-map "w" 'delete-window)
-(keymap-set kill-map "k" 'kill-buffer-and-window)
-(keymap-set kill-map "b" 'kill-current-buffer)
-
-;; (define-prefix-command 'my-space-mode-map)
-(keymap-set my-space-mode-map "p" project-prefix-map)
-(keymap-set my-space-mode-map "v" vc-prefix-map)
-(keymap-set my-space-mode-map "f" 'file-map)
-(keymap-set my-space-mode-map "k" 'kill-map)
-(keymap-set my-space-mode-map "c" mode-specific-map)
-(keymap-set my-space-mode-map "s" search-map)
-(keymap-set my-space-mode-map "h" help-map)
-(keymap-set my-space-mode-map "b" 'consult-buffer)
-(keymap-set my-space-mode-map "B" 'list-buffers)
-(keymap-set my-space-mode-map "SPC" 'eglot-format-buffer)
-(keymap-set my-space-mode-map "r" 'eglot-rename)
-;; (keymap-set my-space-mode-map "e" 'consult-flymake)
-;; (keymap-set my-space-mode-map "E" 'consult-compile-error)
-
-;; (define-prefix-command 'space-map)
-;; (keymap-set space-map "p" project-prefix-map)
-;; (keymap-set space-map "v" vc-prefix-map)
-;; (keymap-set space-map "f" 'file-map)
-;; (keymap-set space-map "k" 'kill-map)
-;; (keymap-set space-map "c" mode-specific-map)
-;; (keymap-set space-map "s" search-map)
-;; (keymap-set space-map "h" help-map)
-;; (keymap-set space-map "b" 'consult-buffer)
-;; (keymap-set space-map "B" 'list-buffers)
-;; (keymap-set space-map "SPC" 'eglot-format-buffer)
-;; (keymap-set space-map "r" 'eglot-rename)
-;; ;; (keymap-set space-map "e" 'consult-flymake)
-;; ;; (keymap-set space-map "E" 'consult-compile-error)
-
-;; [TODO] add hooks instead?
-(require 'backtrace)
-(dolist (mode-map (list help-mode-map backtrace-mode-map))
-  (keymap-set mode-map "SPC" 'space-map))
-
-;; (use-package comint
-;;   :custom (comint-buffer-maximum-size (* 1024 1024)))
+;; C-c keybinds
+(keymap-set mode-specific-map "C-r" 'recentf)
+(keymap-set mode-specific-map "C-c" 'compile)
+(keymap-set mode-specific-map "C" 'recompile)
 
 (defun display-startup-time ()
   "Display the startup time and number of garbage collections."
