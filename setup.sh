@@ -1,12 +1,11 @@
 #!/usr/bin/env sh
 
+# don't use, more trouble than it's worth, just symlink manually
+
 set -eu
 
-# Setup emacs
-EMACS_CONFIG="$HOME/.emacs.d"
-rm -rf "$EMACS_CONFIG"
-git clone https://github.com/jamescherti/minimal-emacs.d.git "$EMACS_CONFIG"
-stow --dotfiles --verbose --target="$EMACS_CONFIG" --restow dot-emacs.d
+DOT_CONFIG="$HOME/.config/doom"
+stow --dotfiles --verbose --target="$DOT_CONFIG" --restow dot-config/doom
 
 # Stow .gitconfig
 stow --dotfiles --verbose --target="$HOME" --restow .

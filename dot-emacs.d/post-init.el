@@ -6,10 +6,13 @@
 ;;
 ;; Ensure adding the following compile-angel code at the very beginning
 ;; of your `~/.emacs.d/post-init.el` file, before all other packages.
-(when (native-comp-available-p)
+(when nil ;(native-comp-available-p)
   (use-package compile-angel
     :ensure t
     :demand t
+    :delight
+    (compile-angel-on-save-local-mode)
+    (compile-angel-on-load-mode)
     :custom
     ;; Set `compile-angel-verbose` to nil to suppress output from compile-angel.
     ;; Drawback: The minibuffer will not display compile-angel's actions.
@@ -36,7 +39,8 @@
     (compile-angel-on-load-mode)))
 
 ;; Allows hiding or customising minor modes in the modeline
-(use-package delight)
+(use-package delight
+  :after emacs)
 
 ;; Auto-revert in Emacs is a feature that automatically updates the
 ;; contents of a buffer to reflect changes made to the underlying file
@@ -196,7 +200,8 @@
 (setq split-width-threshold 100)
 
 (use-package avy
-  :bind ("C-:" . 'avy-goto-char))
+  ;; :bind ("C-:" . 'avy-goto-char)
+  )
 
 (use-package ace-window
   :custom (aw-keys '(?f ?d ?s ?a ?k ?l ?h ?g))
@@ -214,7 +219,8 @@
   :commands (corfu-mode global-corfu-mode)
   ;; Optional customizations
   :bind (:map corfu-map
-              ("RET" . nil))
+              ("RET" . nil)
+              ("ESC" . corfu-quit))
   :custom
   (corfu-auto t)
   (corfu-cycle t) ;; Enable cycling for `corfu-next/previous'
@@ -627,6 +633,7 @@ folder, otherwise delete a character backward"
   (pixel-scroll-precision-mode 1))
 
 ;; Display the time in the modeline
+(setq display-time-24hr-format t)
 (add-hook 'after-init-hook #'display-time-mode)
 
 ;; Paren match highlighting
@@ -719,9 +726,11 @@ folder, otherwise delete a character backward"
 
 (use-package meow
   :config
+  (require 'meow)
   (defun meow-setup ()
     (setq meow-cheatsheet-layout meow-cheatsheet-layout-qwerty)
-    (meow-motion-overwrite-define-key
+    ;; This stuff here overwrites keys in other modes (dired, magit, etc.)
+    (meow-motion-define-key
      '("j" . meow-next)
      '("k" . meow-prev)
      '("<escape>" . ignore))
@@ -804,10 +813,50 @@ folder, otherwise delete a character backward"
   (meow-setup)
   (meow-global-mode 1))
 
+(use-package meow-tree-sitter
+  :after meow
+  :config
+  (meow-tree-sitter-register-defaults))
+
+(use-package eldoc-box
+  :hook (eldoc-managed-mode . eldoc-box-hover-mode))
+
+;; (use-package boon
+;;   :config
+;;   (require 'boon-qwerty)
+;;   (boon-mode)
+;;   ;; Don't know why this doesn't work, says that it's a void variable
+;;   ;; (cl-callf append boon-enclosures '((?` . ("`" "`"))
+;;   ;;                                    (?\( . ("(" ")"))
+;;   ;;                                    (?\) . ("(" ")"))
+;;   ;;                                    (?\[ . ("[" "]"))
+;;   ;;                                    (?\] . ("[" "]"))
+;;   ;;                                    (?\{ . ("{" "}"))
+;;   ;;                                    (?\} . ("{" "}"))
+;;   ;;                                    (?< . ("<" ">"))
+;;   ;;                                    (?> . ("<" ">"))
+;;   ;;                                    (?\' . ("'" "'"))
+;;   ;;                                    (?\" . ("\"" "\""))))
+;;   ;; (require 'boon-powerline)
+;;   ;; (boon-powerline-theme)
+;;   )
+;; 
+;; (use-package swiper
+;;   :after boon
+;;   :custom
+;;   (swiper-action-recenter t) ; Recenter for each swiper search entry
+;;   :config
+;;   (keymap-set boon-command-map "r" 'swiper))
+;; 
+;; (use-package multiple-cursors
+;;   :custom
+;;   (mc/always-run-for-all t) ; allow all cmds in multiple cursors mode
+;;   )
+
 ;; C-c keybinds
-(keymap-set mode-specific-map "C-r" 'recentf)
-(keymap-set mode-specific-map "C-c" 'compile)
-(keymap-set mode-specific-map "C" 'recompile)
+(keymap-set mode-specific-map "R" 'recentf)
+(keymap-set mode-specific-map "C" 'compile)
+;; (keymap-set mode-specific-map "C" 'recompile)
 
 (defun display-startup-time ()
   "Display the startup time and number of garbage collections."
