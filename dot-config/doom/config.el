@@ -32,8 +32,9 @@
 ;; There are two ways to load a theme. Both assume the theme is installed and
 ;; available. You can either set `doom-theme' or manually load a theme with the
 ;; `load-theme' function. This is the default:
-(setq doom-font (font-spec :family "MapleMono"
-                           :size (cond ((equal 2560 (display-pixel-width)) 26)
+(setq doom-font (font-spec :family "Maple Mono"
+                           :size (cond ((equal system-type 'darwin) 16)
+                                       ((equal 2560 (display-pixel-width)) 26)
                                        (20)))
       doom-symbol-font (font-spec :family "Symbols Nerd Font Mono"))
 
