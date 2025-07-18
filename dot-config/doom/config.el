@@ -119,6 +119,20 @@
 ;; No default compile command
 (setq compile-command "")
 
+;; Ask to add newline before EOF if there isn't any
+(setq require-final-newline 'ask)
+
+;; Use ]-e and [-e to navigate flymake errors
+(add-hook 'flymake-mode-hook
+          (lambda ()
+            (setq-local next-error-function #'flymake-goto-next-error)))
+
+;; Configure language servers
+(after! eglot
+  (add-to-list 'eglot-server-programs
+               '((cmake-mode cmake-ts-mode)
+                 .  ("neocmakelsp" "--stdio"))))
+
 (set-font-ligatures! 'prog-mode
   ;; == === ==== => =| =>>=>=|=>==>> ==< =/=//=//
   ;; =:= =!=
