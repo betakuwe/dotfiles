@@ -1,4 +1,5 @@
 ;;; post-init.el --- DESCRIPTION -*- no-byte-compile: t; lexical-binding: t; -*-
+
 (defun display-startup-time ()
   "Display the startup time and number of garbage collections."
   (message "Emacs init loaded in %.2f seconds (Full emacs-startup: %.2fs) with %d garbage collections."
