@@ -73,7 +73,7 @@
   ;; Softwrap and still kill to end of line instead of killing visual line only
   ;; maybe consider disable the go to beginning or end of visual line too?
   (global-visual-line-mode 1)
-  (keymap-unset visual-line-mode-map "C-k")
+  ;; (keymap-unset visual-line-mode-map "C-k")
 
   ;; Make lambda appear as a symbol
   (global-prettify-symbols-mode 1))
@@ -200,7 +200,7 @@
         ("C-n" . minibuffer-next-completion)
         ("C-p" . minibuffer-previous-completion)
         ("C-y" . minibuffer-choose-completion))
-  (:map completion-in-region-mode-map
+  (:map minibuffer-mode-map
         ("C-n" . minibuffer-next-completion)
         ("C-p" . minibuffer-previous-completion)
         ("C-y" . minibuffer-choose-completion))
@@ -413,6 +413,26 @@
 ;; (use-package tree-sitter-langs)
 
 (use-package magit)
+
+;; (use-package god-mode
+;;   :demand t
+;;   :hook (post-command . (lambda () (setq cursor-type (if god-local-mode 'box 'bar))))
+;;   :init (require 'god-mode-isearch)
+;;   :custom
+;;   (god-exempt-major-modes nil)
+;;   (god-exempt-predicates nil)
+;;   (god-mode-enable-function-key-translation nil)
+;;   :bind
+;;   ("<escape>" . (lambda () (interactive) (god-mode-all 1)))
+;;   (:map god-local-mode-map
+;;         ("i" . #'god-mode-all)
+;;         ("." . #'repeat)
+;;         ("z" . #'repeat))
+;;   (:map isearch-mode-map ("<escape>" . #'god-mode-isearch-activate))
+;;   (:map god-mode-isearch-map ("<escape>" . #'god-mode-isearch-disable)))
+
+(use-package diff-hl
+  :config (global-diff-hl-mode))
 
 (use-package markdown-mode :defer t)
 (use-package toml-mode :defer t)
