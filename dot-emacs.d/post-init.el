@@ -326,9 +326,10 @@
 ;;   (:map god-mode-isearch-map ("<escape>" . #'god-mode-isearch-disable)))
 
 (use-package diff-hl
+  :custom (diff-hl-disable-on-remote t) ; disable on tramp
+  :hook (magit-post-refresh . diff-hl-magit-post-refresh)
   :config
-  ;; Diffs on the fly (I think it means it watches for changes)
-  (diff-hl-flydiff-mode 1)
+  (diff-hl-dired-mode 1)
   (global-diff-hl-mode))
 
 (use-package markdown-mode :defer t)
