@@ -126,13 +126,7 @@
 ;;   :bind (:map viper-vi-basic-map
 ;;               ("K" . #'eldoc)
 ;;               ("C-o" . #'pop-global-mark)
-;;               ("<backspace>" . #'dired-jump)
-;;               ("d" . (lambda ()
-;;                        (interactive)
-;;                        (if mark-active
-;;                            (kill-region (region-beginning)
-;;                                         (1+ (region-end)))
-;;                          (viper-command-argument nil)))))
+;;               ("<backspace>" . #'dired-jump))
 ;;   :config
 ;;   (viper-modify-major-mode 'dired-mode 'vi-state
 ;;                            (define-keymap :parent viper-vi-basic-map
@@ -308,29 +302,35 @@
 
 (use-package magit)
 
-;; (use-package god-mode
-;;   :demand t
-;;   :hook (post-command . (lambda () (setq cursor-type (if god-local-mode 'box 'bar))))
-;;   :init (require 'god-mode-isearch)
-;;   :custom
-;;   (god-exempt-major-modes nil)
-;;   (god-exempt-predicates nil)
-;;   (god-mode-enable-function-key-translation nil)
-;;   :bind
-;;   ("<escape>" . (lambda () (interactive) (god-mode-all 1)))
-;;   (:map god-local-mode-map
-;;         ("i" . #'god-mode-all)
-;;         ("." . #'repeat)
-;;         ("z" . #'repeat))
-;;   (:map isearch-mode-map ("<escape>" . #'god-mode-isearch-activate))
-;;   (:map god-mode-isearch-map ("<escape>" . #'god-mode-isearch-disable)))
-
 (use-package diff-hl
-  :custom (diff-hl-disable-on-remote t) ; disable on tramp
+  ;; :custom (diff-hl-disable-on-remote t) ; disable on tramp
   :hook (magit-post-refresh . diff-hl-magit-post-refresh)
   :config
   (diff-hl-dired-mode 1)
   (global-diff-hl-mode))
+
+(use-package phi-search
+  :bind
+  ("C-s" . #'phi-search)
+  ("C-r" . #'phi-search-backward))
+
+(use-package multiple-cursors
+  :custom (mc/always-run-for-all t)
+  :bind ("C-S-c C-S-c" . #'mc/edit-lines))
+
+(use-package region-bindings-mode
+  :after multiple-cursors
+  :bind (:map region-bindings-mode-map
+              ("a" . 'mc/mark-all-like-this)
+              ("p" . 'mc/mark-previous-like-this)
+              ("n" . 'mc/mark-next-like-this)
+              ("m" . 'mc/mark-more-like-this-extended))
+  :custom (region-bindings-mode-enable))
+
+(use-package expand-region
+  :bind
+  ("C-=" . 'er/expand-region)
+  ("C-+" . 'er/contract-region))
 
 (use-package markdown-mode :defer t)
 (use-package toml-mode :defer t)
