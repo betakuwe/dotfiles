@@ -335,3 +335,4 @@
 (use-package markdown-mode :defer t)
 (use-package toml-mode :defer t)
 (use-package cmake-mode :defer t)
+(use-package kotlin-mode :defer t)
