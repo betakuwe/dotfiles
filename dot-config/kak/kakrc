@@ -1,0 +1,159 @@
+colorscheme catppuccin_latte
+
+set-option global tabstop 2
+
+add-highlighter global/ show-matching -previous
+add-highlighter global/ show-whitespaces -lf "" -only-trailing
+#add-highlighter global/ show-whitespaces -lf "" -spc " "
+#add-highlighter global/trailing-whitespace regex '\h+$' 0:Error
+add-highlighter global/ number-lines -relative
+add-highlighter global/ wrap -word -indent
+
+map global user y '<a-|>xclip -i -selection clipboard<ret>' -docstring 'yank to clipboard'
+map global normal <C-h> ':bp<ret>' -docstring 'previous buffer'
+map global insert <C-h> '<esc>:bp<ret>' -docstring 'previous buffer'
+map global normal <C-l> ':bn<ret>' -docstring 'next buffer'
+map global insert <C-l> '<esc>:bn<ret>' -docstring 'next buffer'
+map global normal <C-w> ':db<ret>' -docstring 'delete buffer'
+map global insert <C-w> '<esc>:db<ret>' -docstring 'delete buffer'
+
+## enable flag-lines hl for git diff
+#hook global WinCreate .* %{
+#    add-highlighter window/git-diff flag-lines Default git_diff_flags
+#}
+## trigger update diff if inside git dir
+#hook global BufOpenFile .* %{
+#    evaluate-commands -draft %sh{
+#        cd $(dirname "$kak_buffile")
+#        if [ $(git rev-parse --git-dir 2>/dev/null) ]; then
+#            for hook in WinCreate BufReload BufWritePost; do
+#                printf "hook buffer -group git-update-diff %s .* 'git update-diff'\n" "$hook"
+#            done
+#        fi
+#    }
+#}
+
+hook global WinCreate .* %{ git show-diff }
+hook global BufWritePost .* %{ git update-diff }
+
+# Bootstrap plug.kak
+evaluate-commands %sh{
+    plugins="$kak_config/plugins"
+    mkdir -p "$plugins"
+    [ ! -e "$plugins/plug.kak" ] && \
+        git clone -q https://github.com/andreyorst/plug.kak.git "$plugins/plug.kak"
+    printf "%s\n" "source '$plugins/plug.kak/rc/plug.kak'"
+}
+plug "andreyorst/plug.kak" noload
+
+plug "andreyorst/fzf.kak" config %{
+    hook global ModuleLoaded fzf-file %{
+        set-option global fzf_file_command 'rg' # 'ag', 'fd', or 'find'
+    }
+    map global user f ': fzf-mode<ret>' -docstring 'fzf mode'
+}
+
+plug 'https://git.sr.ht/~hadronized/git.kak' config %{
+    map global user g ':enter-user-mode git<ret>' -docstring 'git mode'
+}
+
+plug 'https://git.sr.ht/~raiguard/kak-mirror' config %{
+  map global normal "'" ': enter-user-mode -lock mirror<ret>'
+}
+
+plug "alexherbo2/auto-pairs.kak" config %{ enable-auto-pairs }
+
+plug "occivink/kakoune-expand" config %{
+    map -docstring "expand" global user e ': expand<ret>'
+
+    # 'lock' mapping where pressing <space> repeatedly will expand the selection
+    declare-user-mode expand
+    map -docstring "expand"                     global expand <space> ': expand<ret>'
+    map -docstring "expand ↻"                   global user   E       ': expand; enter-user-mode -lock expand<ret>'
+    map -docstring "undo last selection change" global expand <a-u>   <a-u>
+    map -docstring "redo last selection change" global expand <a-U>   <a-U>
+}
+
+##################################################
+# Formatter
+##################################################
+
+## This doesn't work because lsp-formatting doesn't cause an error when an lsp isn't found
+#define-command format-with-lsp-or-formatter -docstring "format with lsp or formatter" %{
+#    try %{
+#        lsp-formatting
+#    } catch %{
+#        format-buffer
+#    }
+#}
+
+map global user <space> '<esc>:format-buffer<ret>' -docstring 'format buffer'
+
+hook global BufSetOption filetype=cmake %{
+    set-option buffer formatcmd "cmake-format -"
+}
+
+hook global BufSetOption filetype=sh %{
+    set-option buffer formatcmd "shfmt"
+}
+
+hook global BufSetOption filetype=awk %{
+    set-option buffer formatcmd "awk -o- -f -"
+}
+
+hook global BufSetOption filetype=toml %{
+    set-option buffer formatcmd "taplo format -"
+}
+
+hook global BufSetOption filetype=yaml %{
+    set-option buffer formatcmd "yamlfmt -in"
+}
+
+##################################################
+# LSP
+# https://github.com/kakoune-lsp/kakoune-lsp
+##################################################
+
+eval %sh{kak-lsp}
+lsp-enable
+map global user l ':enter-user-mode lsp<ret>' -docstring 'LSP mode'
+map global insert <tab> '<a-;>:try lsp-snippets-select-next-placeholders catch %{ execute-keys -with-hooks <lt>tab> }<ret>' -docstring 'Select next snippet placeholder'
+map global object a '<a-semicolon>lsp-object<ret>' -docstring 'LSP any symbol'
+map global object <a-a> '<a-semicolon>lsp-object<ret>' -docstring 'LSP any symbol'
+map global object f '<a-semicolon>lsp-object Function Method<ret>' -docstring 'LSP function or method'
+map global object t '<a-semicolon>lsp-object Class Interface Struct<ret>' -docstring 'LSP class interface or struct'
+map global object d '<a-semicolon>lsp-diagnostic-object --include-warnings<ret>' -docstring 'LSP errors and warnings'
+map global object D '<a-semicolon>lsp-diagnostic-object<ret>' -docstring 'LSP errors'
+map global insert <c-n> '<a-;>:lsp-snippets-select-next-placeholders<ret>' -docstring 'Select next snippet placeholder'
+
+hook global InsertCompletionShow .* %{
+  unmap global insert <c-n> '<a-;>:lsp-snippets-select-next-placeholders<ret>'
+}
+
+hook global InsertCompletionHide .* %{
+  map global insert <c-n> '<a-;>:lsp-snippets-select-next-placeholders<ret>' -docstring 'Select next snippet placeholder'
+}
+
+lsp-inlay-hints-enable global
+lsp-inlay-diagnostics-enable global
+
+# Configure LSPs
+# See: https://github.com/kakoune-lsp/kakoune-lsp/blob/master/rc/servers.kak
+
+hook -group lsp-filetype-dart global BufSetOption filetype=dart %{
+    set-option buffer lsp_servers %{
+        [fvm-dart-lsp]
+        root_globs = ["pubspec.yaml", ".git", ".hg"]
+        command = "fvm"
+        args = ["dart", "language-server"]
+    }
+}
+
+hook -group lsp-filetype-cmake global BufSetOption filetype=cmake %{
+    set-option buffer lsp_servers %{
+        [cmake-language-server]
+        root_globs = ["CMakeLists.txt", ".git", ".hg"]
+        command = "neocmakelsp"
+        args = ["stdio"]
+    }
+}
