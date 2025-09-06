@@ -17,25 +17,6 @@ map global insert <C-l> '<esc>:bn<ret>' -docstring 'next buffer'
 map global normal <C-w> ':db<ret>' -docstring 'delete buffer'
 map global insert <C-w> '<esc>:db<ret>' -docstring 'delete buffer'
 
-## enable flag-lines hl for git diff
-#hook global WinCreate .* %{
-#    add-highlighter window/git-diff flag-lines Default git_diff_flags
-#}
-## trigger update diff if inside git dir
-#hook global BufOpenFile .* %{
-#    evaluate-commands -draft %sh{
-#        cd $(dirname "$kak_buffile")
-#        if [ $(git rev-parse --git-dir 2>/dev/null) ]; then
-#            for hook in WinCreate BufReload BufWritePost; do
-#                printf "hook buffer -group git-update-diff %s .* 'git update-diff'\n" "$hook"
-#            done
-#        fi
-#    }
-#}
-
-hook global WinCreate .* %{ git show-diff }
-hook global BufWritePost .* %{ git update-diff }
-
 # Bootstrap plug.kak
 evaluate-commands %sh{
     plugins="$kak_config/plugins"
@@ -51,10 +32,8 @@ plug "andreyorst/fzf.kak" config %{
         set-option global fzf_file_command 'rg' # 'ag', 'fd', or 'find'
     }
     map global user f ': fzf-mode<ret>' -docstring 'fzf mode'
-}
-
-plug 'https://git.sr.ht/~hadronized/git.kak' config %{
-    map global user g ':enter-user-mode git<ret>' -docstring 'git mode'
+    # don't know how to get this to load
+    #    plug 'https://gitlab.com/losnappas/fzf-yank-ring.kak.git' load-path "%opt{plug_install_dir}/fzf.kak/rc/modules/"
 }
 
 plug 'https://git.sr.ht/~raiguard/kak-mirror' config %{
@@ -72,6 +51,18 @@ plug "occivink/kakoune-expand" config %{
     map -docstring "expand ↻"                   global user   E       ': expand; enter-user-mode -lock expand<ret>'
     map -docstring "undo last selection change" global expand <a-u>   <a-u>
     map -docstring "redo last selection change" global expand <a-U>   <a-U>
+}
+
+##################################################
+# git
+##################################################
+
+hook global WinCreate .* %{ git show-diff }
+hook global BufWritePost .* %{ git update-diff }
+
+plug 'https://git.sr.ht/~hadronized/git.kak' config %{
+    map global user g ':enter-user-mode git<ret>' -docstring 'git mode'
+    map global git h ':git log -p -- <c-r>%<ret>' -docstring 'file history'
 }
 
 ##################################################
@@ -155,5 +146,13 @@ hook -group lsp-filetype-cmake global BufSetOption filetype=cmake %{
         root_globs = ["CMakeLists.txt", ".git", ".hg"]
         command = "neocmakelsp"
         args = ["stdio"]
+    }
+}
+
+hook -group lsp-filetype-c-family global BufSetOption filetype=(?:c|cpp|objc) %{
+    set-option buffer lsp_servers %{
+        [clangd]
+        args = ["--log=error", "--enable-config"]
+        root_globs = ["compile_commands.json", ".clangd", ".git", ".hg"]
     }
 }

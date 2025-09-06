@@ -38,13 +38,22 @@ fi
 # nice alias
 alias ..='cd ..'
 
-# connect to last kakoune session
 if commands_exist kak; then
 	function k() {
-		kak -clear
-		local last_session
-		last_session=$(kak -l | head -n1)
-		kak ${last_session:+-c $last_session} "$@"
+		kak -clear # clear dead sessions
+		local kak_session_name kak_flag
+		if commands_exist tmux && [[ -n "$TMUX" ]]; then
+			# if in tmux session, kak session takes the name of tmux session
+			kak_session_name=$(tmux display-message -p '#S')
+		else
+			kak_session_name='non_tmux'
+		fi
+		if [[ -n $(kak -l | grep "$kak_session_name" | head -n1) ]]; then
+			kak_flag='-c' # attach to session
+		else
+			kak_flag='-s' # start new session
+		fi
+		kak "$kak_flag" "$kak_session_name" "$@"
 	}
 fi
 
@@ -78,7 +87,20 @@ fi
 # shellcheck source=/dev/null
 commands_exist fzf && source <(fzf --bash)
 
-# If tmux is available and not already in a tmux session, start or attach
 if commands_exist tmux && [ -z "$TMUX" ]; then
-	tmux attach || tmux
+	# create new tmux session with name of specified directory and start dir there or if no directory arg is given, start at current directory
+	function t() {
+		if [[ -n $1 ]]; then
+			local dir
+			dir=$(realpath "$1")
+			shift
+			tmux new-session -A -c "$dir" -s "$(basename "$dir")" "$@"
+		else
+			tmux new-session -s "$(basename "$PWD")"
+		fi
+	}
+fi
+
+if commands_exist clj; then
+	alias cljd='clj -M:cljd'
 fi
