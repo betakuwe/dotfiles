@@ -39,6 +39,8 @@ fi
 alias ..='cd ..'
 
 if commands_exist kak; then
+	export EDITOR=$(which kak)
+
 	function k() {
 		kak -clear # clear dead sessions
 		local kak_session_name kak_flag
@@ -64,7 +66,7 @@ LS_COLORS="*~=0;38;2;172;176;190:bd=0;38;2;32;159;181;48;2;204;208;218:ca=0:cd=0
 export LS_COLORS
 
 # shellcheck disable=SC2154
-PS1="\n\$(exit_status=\$?; [[ \$exit_status -eq 0 ]] && echo \"\[\033[1;32m\]=^..^= [\t] [\$exit_status]\" || echo \"\[\033[1;31m\]=^..^= [\t] [\$exit_status]\")\n\[\033[1;36m\]\w\[\033[1;35m\]\$(__git_ps1 '\n%s')\n\[\033[0;34m\]🐈\[\033[00m\]"
+PS1="\n\$(exit_status=\$?; [[ \$exit_status -eq 0 ]] && echo \"\[\033[1;32m\]=^..^= [\t] [\j] [\$exit_status]\" || echo \"\[\033[1;31m\]=^..^= [\t] [\j] [\$exit_status]\")\n\[\033[1;36m\]\w\[\033[1;35m\]\$(__git_ps1 '\n%s')\n\[\033[0;34m\]🐈\[\033[00m\]"
 PS2="\[\033[34m\]🐈\[\033[00m\]"
 PS3=🐈
 
