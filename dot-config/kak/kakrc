@@ -9,7 +9,9 @@ add-highlighter global/ show-whitespaces -lf "" -only-trailing
 add-highlighter global/ number-lines -relative
 add-highlighter global/ wrap -word -indent
 
-map global user y '<a-|>xclip -i -selection clipboard<ret>' -docstring 'yank to clipboard'
+define-command yank-to-clipboard %{ nop %sh{ tmux set-buffer -w "$kak_selections" } }
+map global user y ':yank-to-clipboard<ret>' -docstring 'yank to clipboard'
+
 map global normal <C-h> ':bp<ret>' -docstring 'previous buffer'
 map global insert <C-h> '<esc>:bp<ret>' -docstring 'previous buffer'
 map global normal <C-l> ':bn<ret>' -docstring 'next buffer'

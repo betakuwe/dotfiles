@@ -6,13 +6,13 @@ bind -x '"\em":__insert_pwd_at_point'
 
 function commands_exist() {
 	if [[ $# -eq 0 ]]; then
-		echo "$0: no commands given, usage: ${0#-} COMMAND [COMMANDS]..."
+		echo "${FUNCNAME[0]}: no commands given, usage: ${FUNCNAME[0]} COMMAND [COMMANDS]..."
 		false
 		return
 	fi
 	for cmd in "$@"; do
 		if ! command -v "$cmd" >/dev/null; then
-			echo "$0: $cmd not found!"
+			echo "${FUNCNAME[0]}: $cmd not found!"
 			false
 			return
 		fi
@@ -66,9 +66,19 @@ LS_COLORS="*~=0;38;2;172;176;190:bd=0;38;2;32;159;181;48;2;204;208;218:ca=0:cd=0
 export LS_COLORS
 
 # shellcheck disable=SC2154
-PS1="\n\$(exit_status=\$?; [[ \$exit_status -eq 0 ]] && echo \"\[\033[1;32m\]=^..^= [\t] [\j] [\$exit_status]\" || echo \"\[\033[1;31m\]=^..^= [\t] [\j] [\$exit_status]\")\n\[\033[1;36m\]\w\[\033[1;35m\]\$(__git_ps1 '\n%s')\n\[\033[0;34m\]🐈\[\033[00m\]"
-PS2="\[\033[34m\]🐈\[\033[00m\]"
-PS3=🐈
+function __set_prompt() {
+	local info_prefix="## "
+	local command_prefix=":; "
+	local command_prefix_colorized="\[\033[0;34m\]$command_prefix\[\033[00m\]"
+	local info_segment="$info_prefix[\t] [\j] [\$exit_status]"
+	local info_line="\n\$(exit_status=\$?; [[ \$exit_status -eq 0 ]] && echo \"\[\033[1;32m\]$info_segment\" || echo \"\[\033[1;31m\]$info_segment\")"
+	local pwd_line="\n\[\033[1;36m\]$info_prefix\w"
+	local git_line="\[\033[1;35m\]\$(__git_ps1 '\n$info_prefix%s')"
+	PS1="$info_line$pwd_line$git_line\n$command_prefix_colorized"
+	PS2="$command_prefix_colorized"
+	PS3="$command_prefix"
+}
+__set_prompt
 
 function __cat_greeting() {
 	local cats_home="$HOME/cats"
