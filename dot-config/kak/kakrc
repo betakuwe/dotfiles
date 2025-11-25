@@ -1,16 +1,40 @@
-colorscheme catppuccin_latte
+#colorscheme catppuccin_latte
+colorscheme black-on-white
 
 set-option global tabstop 2
 
 add-highlighter global/ show-matching -previous
 add-highlighter global/ show-whitespaces -lf "" -only-trailing
-#add-highlighter global/ show-whitespaces -lf "" -spc " "
-#add-highlighter global/trailing-whitespace regex '\h+$' 0:Error
 add-highlighter global/ number-lines -relative
 add-highlighter global/ wrap -word -indent
 
-define-command yank-to-clipboard %{ nop %sh{ tmux set-buffer -w "$kak_selections" } }
-map global user y ':yank-to-clipboard<ret>' -docstring 'yank to clipboard'
+declare-user-mode config-mode
+map global user c ':enter-user-mode config-mode<ret>' -docstring 'config mode'
+map global config-mode k ':edit ~/.config/kak/kakrc<ret>' -docstring 'edit kak config'
+map global config-mode t ':edit ~/.tmux.conf<ret>' -docstring 'edit tmux config'
+map global config-mode b ':edit ~/scripts/oh-my-bash.bash<ret>' -docstring 'edit bash config'
+
+# no syntax highlighting cuz i'm not juvenile (lol)
+set global disabled_hooks '.*-highlight'
+
+# share yank register with tmux buffer
+#hook global RegisterModified '"' %{ nop %sh{ tmux set-buffer -w -- "$kak_reg_dquote" } }
+
+define-command yank-to-tmux-clipboard %{ nop %sh{ tmux set-buffer -w "$kak_selections" } }
+map global user y ':yank-to-tmux-clipboard<ret>' -docstring 'yank to clipboard'
+
+hook global FocusIn .* %{ echo -debug focus! } # doesn't work yet
+
+# case insensitive search
+hook global NormalKey (<a-[/?]>|[/?]) %{ execute-keys (?i) }
+hook global NormalKey ([sS]|<a-[kK]>) %{ execute-keys (?i) } # idk why this doesn't work
+
+define-command goto-file-line-column %{
+    evaluate-commands %sh{
+        printf 'edit %s' "$(printf '%s' $kak_selections | tr ':' ' ')"
+    }
+}
+map global goto F '<esc>:goto-file-line-column<ret>' -docstring 'file[:line[:col]]'
 
 map global normal <C-h> ':bp<ret>' -docstring 'previous buffer'
 map global insert <C-h> '<esc>:bp<ret>' -docstring 'previous buffer'
@@ -30,8 +54,11 @@ evaluate-commands %sh{
 plug "andreyorst/plug.kak" noload
 
 plug "andreyorst/fzf.kak" config %{
+#    hook global ModuleLoaded fzf-file %{
+#        set-option global fzf_file_command 'rg' # 'ag', 'fd', or 'find'
+#    }
     hook global ModuleLoaded fzf-file %{
-        set-option global fzf_file_command 'rg' # 'ag', 'fd', or 'find'
+        set-option global fzf_file_command 'find -type f ! -path \*/.\*' # 'ag', 'fd', or 'find'
     }
     map global user f ': fzf-mode<ret>' -docstring 'fzf mode'
     # don't know how to get this to load
@@ -53,6 +80,23 @@ plug "occivink/kakoune-expand" config %{
     map -docstring "expand ↻"                   global user   E       ': expand; enter-user-mode -lock expand<ret>'
     map -docstring "undo last selection change" global expand <a-u>   <a-u>
     map -docstring "redo last selection change" global expand <a-U>   <a-U>
+}
+
+plug "eko234/kakoune-recent-buffers" config %{
+  declare-user-mode chain
+  map global user r ": recent-buffers-pick-link<ret>" -docstring "recent buffers"
+  map global user R ": enter-user-mode -lock chain<ret>" -docstring "chain mode"
+  map global chain p ": recent-buffers-loose-chain<ret>" -docstring "loose"
+  map global chain n ": recent-buffers-pull-chain<ret>" -docstring "pull"
+}
+
+# parinfer https://github.com/eraserhd/parinfer-rust
+plug "eraserhd/parinfer-rust" do %{
+    cargo install --force --path .
+} config %{
+    hook global WinSetOption filetype=(clojure|lisp|picolisp|racket|scheme) %{
+        parinfer-enable-window -smart
+    }
 }
 
 ##################################################
@@ -127,11 +171,13 @@ hook global InsertCompletionHide .* %{
   map global insert <c-n> '<a-;>:lsp-snippets-select-next-placeholders<ret>' -docstring 'Select next snippet placeholder'
 }
 
-lsp-inlay-hints-enable global
-lsp-inlay-diagnostics-enable global
+#lsp-inlay-hints-enable global
+#lsp-inlay-diagnostics-enable global
 
 # Configure LSPs
 # See: https://github.com/kakoune-lsp/kakoune-lsp/blob/master/rc/servers.kak
+
+remove-hooks global lsp-filetype-.*
 
 hook -group lsp-filetype-dart global BufSetOption filetype=dart %{
     set-option buffer lsp_servers %{
@@ -154,7 +200,12 @@ hook -group lsp-filetype-cmake global BufSetOption filetype=cmake %{
 hook -group lsp-filetype-c-family global BufSetOption filetype=(?:c|cpp|objc) %{
     set-option buffer lsp_servers %{
         [clangd]
-        args = ["--log=error", "--enable-config"]
+        args = ["--clang-tidy",
+                "--header-insertion=iwyu",
+                "--completion-style=detailed",
+                "--function-arg-placeholders",
+                "--log=verbose",
+                "--enable-config"]
         root_globs = ["compile_commands.json", ".clangd", ".git", ".hg"]
     }
 }

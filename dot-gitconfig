@@ -1,8 +1,13 @@
+[init]
+	defaultBranch = main
 [alias]
 	l = log --date-order --date=iso --graph --full-history --all --pretty=format:'%x08%x09%C(red)%h %C(cyan)%ad%x08%x08%x08%x08%x08%x08%x08%x08%x08%x08%x08%x08%x08%x08%x08 %C(bold blue)%aN%C(reset)%C(bold yellow)%d %C(reset)%s'
 
+[color]
+	ui = never
+
 [core]
-        editor = "hx"
+        editor = "kak"
 
 [includeIf "exists:$HOME/.gitconfig-local"]
         path = $HOME/.gitconfig-local
@@ -54,3 +59,8 @@
         conflictstyle = diff3
 [pull]
         rebase = true
+[filter "lfs"]
+	clean = git-lfs clean -- %f
+	smudge = git-lfs smudge -- %f
+	process = git-lfs filter-process
+	required = true
