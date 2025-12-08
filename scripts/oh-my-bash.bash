@@ -133,16 +133,16 @@ if commands_exist tmux; then
 		}
 	fi
 
-	_t_completions() {
+	function _t_completions() {
 		# only complete first arg after command
-		if [ "${#COMP_WORDS[@]}" -ne 2 ]; then
+		if [[ "${#COMP_WORDS[@]}" -ne 2 ]]; then
 			return
 		fi
 
 		# suggest tmux session names
 		local tmux_sessions
 		mapfile -t tmux_sessions < <(IFS=$'\n' compgen -W "$(tmux ls)" -- "${COMP_WORDS[COMP_CWORD]}")
-		if [ "${#tmux_sessions[@]}" -eq 1 ]; then
+		if [[ "${#tmux_sessions[@]}" -eq 1 ]]; then
 			COMPREPLY=("${tmux_sessions[0]%%: *}")
 		else
 			COMPREPLY=("${tmux_sessions[@]}")
