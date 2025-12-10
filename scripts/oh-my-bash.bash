@@ -140,13 +140,16 @@ if commands_exist tmux; then
 		fi
 
 		# suggest tmux session names
-		local tmux_sessions
-		mapfile -t tmux_sessions < <(IFS=$'\n' compgen -W "$(tmux ls)" -- "${COMP_WORDS[COMP_CWORD]}")
-		if [[ "${#tmux_sessions[@]}" -eq 1 ]]; then
-			COMPREPLY=("${tmux_sessions[0]%%: *}")
-		else
-			COMPREPLY=("${tmux_sessions[@]}")
+		if local tmux_ls_out="$(tmux ls)"; then
+			local tmux_sessions
+			mapfile -t tmux_sessions < <(IFS=$'\n' compgen -W "$tmux_ls_out" -- "${COMP_WORDS[COMP_CWORD]}")
+			if [[ "${#tmux_sessions[@]}" -eq 1 ]]; then
+				COMPREPLY=("${tmux_sessions[0]%%: *}")
+			else
+				COMPREPLY=("${tmux_sessions[@]}")
+			fi
 		fi
+
 	}
 	# suggest tmux session names and directories
 	complete -F _t_completions -A directory t
