@@ -140,7 +140,7 @@ if commands_exist tmux; then
 		fi
 
 		# suggest tmux session names
-		if local tmux_ls_out="$(tmux ls)"; then
+		if local tmux_ls_out="$(tmux ls 2>&1 >/dev/null)"; then
 			local tmux_sessions
 			mapfile -t tmux_sessions < <(IFS=$'\n' compgen -W "$tmux_ls_out" -- "${COMP_WORDS[COMP_CWORD]}")
 			if [[ "${#tmux_sessions[@]}" -eq 1 ]]; then

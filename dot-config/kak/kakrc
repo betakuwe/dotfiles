@@ -2,6 +2,7 @@
 colorscheme black-on-white
 
 set-option global tabstop 2
+set-option global indentwidth 2
 
 add-highlighter global/ show-matching -previous
 add-highlighter global/ show-whitespaces -lf "" -only-trailing
@@ -88,15 +89,6 @@ plug "eko234/kakoune-recent-buffers" config %{
   map global user R ": enter-user-mode -lock chain<ret>" -docstring "chain mode"
   map global chain p ": recent-buffers-loose-chain<ret>" -docstring "loose"
   map global chain n ": recent-buffers-pull-chain<ret>" -docstring "pull"
-}
-
-# parinfer https://github.com/eraserhd/parinfer-rust
-plug "eraserhd/parinfer-rust" do %{
-    cargo install --force --path .
-} config %{
-    hook global WinSetOption filetype=(clojure|lisp|picolisp|racket|scheme) %{
-        parinfer-enable-window -smart
-    }
 }
 
 ##################################################
