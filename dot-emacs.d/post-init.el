@@ -861,6 +861,15 @@
   ("C-=" . 'er/expand-region)
   ("C-+" . 'er/contract-region))
 
+(use-package vc-jj :defer t)
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Mode specific stuff
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;; For copying org-mode contents into Confluence
+(use-package ox-clip :after org :defer t)
+
 (use-package markdown-mode :defer t)
 (use-package toml-mode :defer t)
 (use-package cmake-mode :defer t)
@@ -875,5 +884,4 @@
 
 (use-package yaml-mode :defer t)
 
-;; For copying org-mode contents into Confluence
-(use-package ox-clip :defer t)
+(use-package dockerfile-mode :defer t)
