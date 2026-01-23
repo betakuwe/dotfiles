@@ -362,7 +362,7 @@
   (add-hook 'yaml-ts-mode-hook #'outline-indent-minor-mode))
 
 (mapc #'disable-theme custom-enabled-themes)  ; Disable all active themes
-(load-theme 'modus-operandi-tinted t)                    ; Load the built-in theme
+(load-theme 'whiteboard t)                    ; Load the built-in theme
 
 ;; The stripspace Emacs package provides stripspace-local-mode, a minor mode
 ;; that automatically removes trailing whitespace and blank lines at the end of
@@ -454,7 +454,8 @@
   ;; (org-fontify-todo-headline t)
   ;; (org-fontify-whole-heading-line t)
   ;; (org-fontify-quote-and-verse-blocks t)
-  (org-startup-truncated t))
+  (org-startup-truncated t)
+  (org-use-speed-commands t))
 
 ;; The markdown-mode package provides a major mode for Emacs for syntax
 ;; highlighting, editing commands, and preview support for Markdown documents.
@@ -863,6 +864,13 @@
 
 (use-package vc-jj :defer t)
 
+;; Is this necessary?
+(use-package flycheck
+  :ensure nil
+  :after flycheck-clj-kondo
+  :config
+  (flycheck-mode 1))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Mode specific stuff
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -881,6 +889,7 @@
 
 ;; Clojure
 (use-package cider :defer t)
+(use-package flycheck-clj-kondo :defer t)
 
 (use-package yaml-mode :defer t)
 
