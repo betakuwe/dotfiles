@@ -669,6 +669,8 @@
 ;; Constrain vertical cursor movement to lines within the buffer
 (setq dired-movement-style 'bounded-files)
 
+(setq wdired-allow-to-change-permissions t)
+
 ;; Dired buffers: Automatically hide file details (permissions, size,
 ;; modification date, etc.) and all the files in the `dired-omit-files' regular
 ;; expression for a cleaner display.

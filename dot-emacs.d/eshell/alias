@@ -1,0 +1,2 @@
+alias jj jj --no-pager $@*
+alias ll ls -halF $@*
