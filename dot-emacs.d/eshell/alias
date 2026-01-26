@@ -1,2 +1,3 @@
-alias jj jj --no-pager $@*
+alias cljd clojure -M:cljd $@*
 alias ll ls -halF $@*
+alias jj jj --no-pager $@*
