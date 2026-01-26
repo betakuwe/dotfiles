@@ -896,3 +896,5 @@
 (use-package yaml-mode :defer t)
 
 (use-package dockerfile-mode :defer t)
+
+(use-package protobuf-mode :defer t)
