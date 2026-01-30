@@ -109,7 +109,6 @@
 ;; Enable `auto-save-mode' to prevent data loss. Use `recover-file' or
 ;; `recover-session' to restore unsaved changes.
 (setq auto-save-default t)
-
 (setq auto-save-interval 300)
 (setq auto-save-timeout 30)
 
@@ -122,8 +121,10 @@
 ;; with a file, while auto-save-visited-mode only saves file-visiting buffers
 ;; after a period of idle time, directly saving to the file itself without
 ;; creating backup files.
-(setq auto-save-visited-interval 5)   ; Save after 5 seconds if inactivity
-(auto-save-visited-mode 1)
+;;
+;; I think I don't like this
+;; (setq auto-save-visited-interval 5)   ; Save after 5 seconds if inactivity
+;; (auto-save-visited-mode 1)
 
 ;; Corfu enhances in-buffer completion by displaying a compact popup with
 ;; current candidates, positioned either below or above the point. Candidates
@@ -591,9 +592,12 @@
   :ensure t
   :commands paredit-mode
   :hook
-  (emacs-lisp-mode . paredit-mode)
-  :config
-  (define-key paredit-mode-map (kbd "RET") nil))
+  ((emacs-lisp-mode
+    clojuredart-mode
+    clojure-mode
+    clojurescript-mode
+    cider-repl-mode)
+   . paredit-mode))
 
 ;; Displays visible indicators for page breaks
 (use-package page-break-lines
@@ -675,6 +679,13 @@
 ;; modification date, etc.) and all the files in the `dired-omit-files' regular
 ;; expression for a cleaner display.
 (add-hook 'dired-mode-hook #'dired-hide-details-mode)
+
+(add-hook 'dired-mode-hook
+          (lambda ()
+            (define-key dired-mode-map (kbd "DEL")
+                        (lambda ()
+                          (interactive)
+                          (find-alternate-file "..")))))
 
 ;; ;; Hide files from dired
 ;; (setq dired-omit-files (concat "\\`[.]\\'"
