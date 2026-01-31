@@ -176,7 +176,7 @@
 (use-package orderless
   :ensure t
   :custom
-  (completion-styles '(orderless basic))
+  (completion-styles '(orderless flex basic))
   (completion-category-defaults nil)
   (completion-category-overrides '((file (styles partial-completion)))))
 
@@ -795,7 +795,7 @@
     (thread-last
       (cond
        ;; On macbook air
-       ((equal system-type 'darwin) 150)
+       ((equal system-type 'darwin) 180)
        ;; Else on work laptop
        ((if (> (x-display-pixel-width) 2560) 160 200)))
       (set-face-attribute 'default nil :height)))
@@ -823,11 +823,6 @@
     (load-file exec-path-file)))
 
 (use-package diminish :demand t)
-
-;; ;; Set colour theme
-;; (use-package catppuccin-theme
-;;   :custom (catppuccin-flavor 'latte)
-;;   :config (load-theme 'catppuccin :no-confirm))
 
 (use-package zoom
   :diminish zoom-mode
