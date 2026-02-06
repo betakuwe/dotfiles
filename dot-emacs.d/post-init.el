@@ -597,7 +597,8 @@
     clojuredart-mode
     clojure-mode
     clojurescript-mode
-    cider-repl-mode)
+    cider-repl-mode
+    fennel-mode)
    . paredit-mode))
 
 ;; Displays visible indicators for page breaks
@@ -886,6 +887,11 @@
 
 ;; For copying org-mode contents into Confluence
 (use-package ox-clip :after org :defer t)
+(use-package org-transclusion
+  ;; :bind (("S-<f12>" . org-transclusion-add)
+  ;;        ("C-c t m" . org-transclusion-transient-menu)
+  ;;        ("C-n t t") . org-transclusion-mode)
+  )
 
 (use-package markdown-mode :defer t)
 (use-package toml-mode :defer t)
@@ -905,3 +911,12 @@
 (use-package dockerfile-mode :defer t)
 
 (use-package protobuf-mode :defer t)
+
+(use-package kotlin-mode :defer t)
+
+(use-package docker
+  :ensure t
+  ;; :bind ("C-c d" . docker)
+  )
+
+(use-package fennel-mode :defer t)
