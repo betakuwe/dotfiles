@@ -1,6 +1,3 @@
-#colorscheme catppuccin_latte
-colorscheme black-on-white
-
 set-option global tabstop 2
 set-option global indentwidth 2
 
@@ -15,20 +12,38 @@ map global config-mode k ':edit ~/.config/kak/kakrc<ret>' -docstring 'edit kak c
 map global config-mode t ':edit ~/.tmux.conf<ret>' -docstring 'edit tmux config'
 map global config-mode b ':edit ~/scripts/oh-my-bash.bash<ret>' -docstring 'edit bash config'
 
-# no syntax highlighting cuz i'm not juvenile (lol)
-set global disabled_hooks '.*-highlight'
-
 # share yank register with tmux buffer
 #hook global RegisterModified '"' %{ nop %sh{ tmux set-buffer -w -- "$kak_reg_dquote" } }
 
-define-command yank-to-tmux-clipboard %{ nop %sh{ tmux set-buffer -w "$kak_selections" } }
-map global user y ':yank-to-tmux-clipboard<ret>' -docstring 'yank to clipboard'
+define-command yank-to-tmux-or-system-clipboard %{ nop %sh{
+  if [ -n "$TMUX" ]; then
+    # inside a tmux session
+    tmux set-buffer -w "$kak_selections"
+	elif command -v xsel >/dev/null; then
+		# use xsel for system clipboard
+		<<EOF xsel -ib
+$kak_selections
+EOF
+  else
+  	echo 'No system clipboard found' >&2
+    exit 1
+  fi
+} }
+map global user y ':yank-to-tmux-or-system-clipboard<ret>' -docstring 'yank to tmux or system clipboard'
 
-hook global FocusIn .* %{ echo -debug focus! } # doesn't work yet
+# Reuse scratch buffer or create a new one
+define-command scratch %{
+  try %{
+    buffer *scratch*
+  } catch %{
+    edit -scratch *scratch*
+  }
+}
+map global user s ':scratch<ret>' -docstring 'Use scratch buffer'
 
 # case insensitive search
 hook global NormalKey (<a-[/?]>|[/?]) %{ execute-keys (?i) }
-hook global NormalKey ([sS]|<a-[kK]>) %{ execute-keys (?i) } # idk why this doesn't work
+hook global NormalKey ([sS]|<a-[kK]>) %{ execute-keys (?i) } # idk why this doesn't work when combined with the line above
 
 define-command goto-file-line-column %{
     evaluate-commands %sh{
@@ -44,6 +59,11 @@ map global insert <C-l> '<esc>:bn<ret>' -docstring 'next buffer'
 map global normal <C-w> ':db<ret>' -docstring 'delete buffer'
 map global insert <C-w> '<esc>:db<ret>' -docstring 'delete buffer'
 
+map global normal <C-a> ':comment-line<ret>' -docstring 'comment line'
+map global insert <C-a> '<esc>:comment-line<ret>' -docstring 'comment line'
+map global normal <C-A> ':comment-block<ret>' -docstring 'comment block'
+map global insert <C-A> '<esc>:comment-block<ret>' -docstring 'comment block'
+
 # Bootstrap plug.kak
 evaluate-commands %sh{
     plugins="$kak_config/plugins"
@@ -54,16 +74,19 @@ evaluate-commands %sh{
 }
 plug "andreyorst/plug.kak" noload
 
+plug "catppuccin/kakoune" theme config %{
+  colorscheme catppuccin_latte
+}
+
 plug "andreyorst/fzf.kak" config %{
-#    hook global ModuleLoaded fzf-file %{
-#        set-option global fzf_file_command 'rg' # 'ag', 'fd', or 'find'
-#    }
-    hook global ModuleLoaded fzf-file %{
-        set-option global fzf_file_command 'find -type f ! -path \*/.\*' # 'ag', 'fd', or 'find'
-    }
     map global user f ': fzf-mode<ret>' -docstring 'fzf mode'
-    # don't know how to get this to load
-    #    plug 'https://gitlab.com/losnappas/fzf-yank-ring.kak.git' load-path "%opt{plug_install_dir}/fzf.kak/rc/modules/"
+} defer fzf %{
+    # set-option global fzf_preview_width '65%'
+    # set-option global fzf_project_use_tilda true
+  declare-option str fzf_file_command 'fd'
+  declare-option str fzf_grep_command 'rg'
+  # set-option global fzf_file_command 'fd' # 'ag', 'fd', or 'find'
+  # set-option global fzf_grep_command 'rg' # 'ag', or 'find'
 }
 
 plug 'https://git.sr.ht/~raiguard/kak-mirror' config %{
@@ -72,24 +95,7 @@ plug 'https://git.sr.ht/~raiguard/kak-mirror' config %{
 
 plug "alexherbo2/auto-pairs.kak" config %{ enable-auto-pairs }
 
-plug "occivink/kakoune-expand" config %{
-    map -docstring "expand" global user e ': expand<ret>'
-
-    # 'lock' mapping where pressing <space> repeatedly will expand the selection
-    declare-user-mode expand
-    map -docstring "expand"                     global expand <space> ': expand<ret>'
-    map -docstring "expand ↻"                   global user   E       ': expand; enter-user-mode -lock expand<ret>'
-    map -docstring "undo last selection change" global expand <a-u>   <a-u>
-    map -docstring "redo last selection change" global expand <a-U>   <a-U>
-}
-
-plug "eko234/kakoune-recent-buffers" config %{
-  declare-user-mode chain
-  map global user r ": recent-buffers-pick-link<ret>" -docstring "recent buffers"
-  map global user R ": enter-user-mode -lock chain<ret>" -docstring "chain mode"
-  map global chain p ": recent-buffers-loose-chain<ret>" -docstring "loose"
-  map global chain n ": recent-buffers-pull-chain<ret>" -docstring "pull"
-}
+plug "Delapouite/kakoune-text-objects"
 
 ##################################################
 # git
@@ -100,7 +106,8 @@ hook global BufWritePost .* %{ git update-diff }
 
 plug 'https://git.sr.ht/~hadronized/git.kak' config %{
     map global user g ':enter-user-mode git<ret>' -docstring 'git mode'
-    map global git h ':git log -p -- <c-r>%<ret>' -docstring 'file history'
+    map global git h ':git log --date-order --date=iso --follow --patch -- <c-r>%<ret>' -docstring 'file history'
+    map global git l ':git log --date-order --date=iso --full-history --all --graph<ret>' -docstring 'commit history'
 }
 
 ##################################################
@@ -108,13 +115,13 @@ plug 'https://git.sr.ht/~hadronized/git.kak' config %{
 ##################################################
 
 ## This doesn't work because lsp-formatting doesn't cause an error when an lsp isn't found
-#define-command format-with-lsp-or-formatter -docstring "format with lsp or formatter" %{
+# define-command format-with-lsp-or-formatter -docstring "format with lsp or formatter" %{
 #    try %{
 #        lsp-formatting
 #    } catch %{
 #        format-buffer
 #    }
-#}
+# }
 
 map global user <space> '<esc>:format-buffer<ret>' -docstring 'format buffer'
 
@@ -144,7 +151,7 @@ hook global BufSetOption filetype=yaml %{
 ##################################################
 
 eval %sh{kak-lsp}
-lsp-enable
+# lsp-enable
 map global user l ':enter-user-mode lsp<ret>' -docstring 'LSP mode'
 map global insert <tab> '<a-;>:try lsp-snippets-select-next-placeholders catch %{ execute-keys -with-hooks <lt>tab> }<ret>' -docstring 'Select next snippet placeholder'
 map global object a '<a-semicolon>lsp-object<ret>' -docstring 'LSP any symbol'
@@ -199,5 +206,16 @@ hook -group lsp-filetype-c-family global BufSetOption filetype=(?:c|cpp|objc) %{
                 "--log=verbose",
                 "--enable-config"]
         root_globs = ["compile_commands.json", ".clangd", ".git", ".hg"]
+    }
+}
+
+hook -group lsp-filetype-ocaml global BufSetOption filetype=ocaml %{
+    set-option buffer lsp_servers %{
+        [ocamllsp]
+        # Often useful to simply do a `touch dune-workspace` in your project root folder if you have problems with root detection
+        root_globs = ["dune-workspace", "dune-project", "Makefile", "opam", "*.opam", "esy.json", ".git", ".hg", "dune"]
+        settings_section = "_"
+        [ocamllsp.settings._]
+        # codelens.enable = false
     }
 }

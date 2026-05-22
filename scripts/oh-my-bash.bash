@@ -1,3 +1,4 @@
+# if in interactive shell
 if [[ $- == *i* ]]; then
 	function __insert_pwd_at_point() {
 		READLINE_LINE="${READLINE_LINE::$READLINE_POINT}$PWD${READLINE_LINE:$READLINE_POINT}"
@@ -8,7 +9,7 @@ fi
 
 function commands_exist() {
 	if [[ $# -eq 0 ]]; then
-		echo "${FUNCNAME[0]}: no commands given, usage: ${FUNCNAME[0]} COMMAND [COMMANDS]..."
+		>&2 echo "${FUNCNAME[0]}: no commands given, usage: ${FUNCNAME[0]} COMMAND [COMMANDS]..."
 		false
 		return
 	fi
@@ -22,12 +23,13 @@ function commands_exist() {
 }
 
 # some more ls aliases
-alias ls='ls --color=never'
-alias ll='ls --color=never -halF'
-alias la='ls --color=never -hAF'
-alias l='ls --color=never -hCF'
+alias ll='ls -halF'
+alias la='ls -haAF'
+alias l='ls -haCF'
 
-alias grep='grep --color=never'
+if commands_exist lazygit; then
+	alias lg='lazygit'
+fi
 
 if commands_exist fvm; then
 	# use fvm when using flutter or dart
@@ -55,7 +57,7 @@ if commands_exist kak; then
 			# if in tmux session, kak session takes the name of tmux session
 			kak_session_name=$(tmux display-message -p '#S')
 		else
-			kak_session_name='non_tmux'
+			kak_session_name="$(basename "$PWD" | tr . _)"
 		fi
 		if [[ -n $(kak -l | grep "$kak_session_name" | head -n1) ]]; then
 			kak_flag='-c' # attach to session
@@ -80,9 +82,6 @@ function __set_prompt() {
 	PS3="$command_prefix"
 }
 __set_prompt
-
-export NO_COLOR=1
-unset LS_COLORS
 
 function __cat_greeting() {
 	local cats_home="$HOME/cats"

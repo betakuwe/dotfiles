@@ -112,25 +112,59 @@
 (setq auto-save-interval 300)
 (setq auto-save-timeout 30)
 
-;; When auto-save-visited-mode is enabled, Emacs will auto-save file-visiting
-;; buffers after a certain amount of idle time if the user forgets to save it
-;; with save-buffer or C-x s for example.
+;; maybe useless because of `diff`
+(defun my/diff-auto-save-file ()
+  "Get auto-save #file# difference with current buffer."
+  (interactive)
+  (diff (make-auto-save-file-name) (current-buffer) nil 'noasync))
+
+;; (use-package completion
+;;   :ensure nil
+;;   :config
+;;   ;; (global-completion-preview-mode 1)
+;;   :custom
+;;   (completion-styles '(flex basic))
+;;   (completions-group t)
+;;   (completions-sort 'historical)
+;;   (completions-format 'one-column)
+;;   (completion-show-help nil)
+;;   (completion-ignore-case t))
 ;;
-;; This is different from auto-save-mode: auto-save-mode periodically saves
-;; all modified buffers, creating backup files, including those not associated
-;; with a file, while auto-save-visited-mode only saves file-visiting buffers
-;; after a period of idle time, directly saving to the file itself without
-;; creating backup files.
-;;
-;; I think I don't like this
-;; (setq auto-save-visited-interval 5)   ; Save after 5 seconds if inactivity
-;; (auto-save-visited-mode 1)
+;; (use-package icomplete
+;;   :ensure nil
+;;   ;; :bind (:map icomplete-minibuffer-map
+;;   ;;             ("M-p" . 'icomplete-backward-completions)
+;;   ;;             ("M-n" . 'icomplete-forward-completions)
+;;   ;;             ("M-RET" . 'icomplete-force-complete-and-exit))
+;;   :custom
+;;   (icomplete-in-buffer t)
+;;   (icomplete-tidy-shadowed-file-names t)
+;;   (icomplete-prospects-height 10)
+;;   (icomplete-vertical-mode t)
+;;   (icomplete-delay-completions-threshold 0)
+;;   (icomplete-compute-delay 0)
+;;   (icomplete-max-delay-chars 0)
+;;   (icomplete-scroll t)
+;;   (icomplete-show-matches-on-no-input t)
+;;   :config
+;;   (advice-add 'completion-at-point
+;;               :after #'minibuffer-hide-completions)
+;;   (fido-vertical-mode 1)
+;;   ;; (fido-mode 1)
+;;   )
+
+;; (use-package ido
+;;   :ensure nil
+;;   :custom
+;;   (ido-use-virtual-buffers t)
+;;   (ido-everywhere t)
+;;   :config
+;;   (ido-mode 1))
 
 ;; Corfu enhances in-buffer completion by displaying a compact popup with
 ;; current candidates, positioned either below or above the point. Candidates
 ;; can be selected by navigating up or down.
 (use-package corfu
-  :ensure t
   :commands (corfu-mode global-corfu-mode)
 
   :hook ((prog-mode . corfu-mode)
@@ -143,6 +177,7 @@
   ;; Disable Ispell completion function. As an alternative try `cape-dict'.
   (text-mode-ispell-word-completion nil)
   (tab-always-indent 'complete)
+  (corfu-auto t)
 
   ;; Enable Corfu
   :config
@@ -152,7 +187,6 @@
 ;; in-buffer completion. It integrates with Corfu or the default completion UI,
 ;; by providing additional backends through completion-at-point-functions.
 (use-package cape
-  :ensure t
   :commands (cape-dabbrev cape-file cape-elisp-block)
   :bind ("C-c p" . cape-prefix-map)
   :init
@@ -160,13 +194,14 @@
   ;; used by `completion-at-point'.
   (add-hook 'completion-at-point-functions #'cape-dabbrev)
   (add-hook 'completion-at-point-functions #'cape-file)
-  (add-hook 'completion-at-point-functions #'cape-elisp-block))
+  (add-hook 'completion-at-point-functions #'cape-elisp-block)
+  ;; (add-hook 'completion-at-point-functions #'cape-elisp-history)
+  )
 
 ;; Vertico provides a vertical completion interface, making it easier to
 ;; navigate and select from completion candidates (e.g., when `M-x` is pressed).
 (use-package vertico
   ;; (Note: It is recommended to also enable the savehist package.)
-  :ensure t
   :config
   (vertico-mode))
 
@@ -174,7 +209,6 @@
 ;; to input multiple patterns separated by spaces, which Orderless then
 ;; matches in any order against the candidates.
 (use-package orderless
-  :ensure t
   :custom
   (completion-styles '(orderless flex basic))
   (completion-category-defaults nil)
@@ -184,50 +218,45 @@
 ;; In addition to that, Marginalia also enhances Vertico by adding rich
 ;; annotations to the completion candidates displayed in Vertico's interface.
 (use-package marginalia
-  :ensure t
   :commands (marginalia-mode marginalia-cycle)
   :hook (after-init . marginalia-mode))
 
-;; Embark integrates with Consult and Vertico to provide context-sensitive
-;; actions and quick access to commands based on the current selection, further
-;; improving user efficiency and workflow within Emacs. Together, they create a
-;; cohesive and powerful environment for managing completions and interactions.
-(use-package embark
-  ;; Embark is an Emacs package that acts like a context menu, allowing
-  ;; users to perform context-sensitive actions on selected items
-  ;; directly from the completion interface.
-  :ensure t
-  :commands (embark-act
-             embark-dwim
-             embark-export
-             embark-collect
-             embark-bindings
-             embark-prefix-help-command)
-  :bind
-  (("C-." . embark-act)         ;; pick some comfortable binding
-   ("C-;" . embark-dwim)        ;; good alternative: M-.
-   ("C-h B" . embark-bindings)) ;; alternative for `describe-bindings'
-
-  :init
-  (setq prefix-help-command #'embark-prefix-help-command)
-
-  :config
-  ;; Hide the mode line of the Embark live/completions buffers
-  (add-to-list 'display-buffer-alist
-               '("\\`\\*Embark Collect \\(Live\\|Completions\\)\\*"
-                 nil
-                 (window-parameters (mode-line-format . none)))))
-
-(use-package embark-consult
-  :ensure t
-  :after (embark consult)
-  :hook
-  (embark-collect-mode . consult-preview-at-point-mode))
+;; ;; Embark integrates with Consult and Vertico to provide context-sensitive
+;; ;; actions and quick access to commands based on the current selection, further
+;; ;; improving user efficiency and workflow within Emacs. Together, they create a
+;; ;; cohesive and powerful environment for managing completions and interactions.
+;; (use-package embark
+;;   ;; Embark is an Emacs package that acts like a context menu, allowing
+;;   ;; users to perform context-sensitive actions on selected items
+;;   ;; directly from the completion interface.
+;;   :commands (embark-act
+;;              embark-dwim
+;;              embark-export
+;;              embark-collect
+;;              embark-bindings
+;;              embark-prefix-help-command)
+;;   :bind
+;;   (("C-." . embark-act)         ;; pick some comfortable binding
+;;    ("C-;" . embark-dwim)        ;; good alternative: M-.
+;;    ("C-h B" . embark-bindings)) ;; alternative for `describe-bindings'
+;;
+;;   :init
+;;   (setq prefix-help-command #'embark-prefix-help-command)
+;;
+;;   :config
+;;   ;; Hide the mode line of the Embark live/completions buffers
+;;   (add-to-list 'display-buffer-alist
+;;                '("\\`\\*Embark Collect \\(Live\\|Completions\\)\\*"
+;;                  nil
+;;                  (window-parameters (mode-line-format . none)))))
+;;
+;; (use-package embark-consult
+;;   :hook
+;;   (embark-collect-mode . consult-preview-at-point-mode))
 
 ;; Consult offers a suite of commands for efficient searching, previewing, and
 ;; interacting with buffers, file contents, and more, improving various tasks.
 (use-package consult
-  :ensure t
   :bind (;; C-c bindings in `mode-specific-map'
          ("C-c M-x" . consult-mode-command)
          ("C-c h" . consult-history)
@@ -312,56 +341,11 @@
    consult-theme :preview-key '(:debounce 0.2 any)
    consult-ripgrep consult-git-grep consult-grep
    consult-bookmark consult-recent-file consult-xref
-   ;; consult--source-bookmark consult--source-file-register
-   ;; consult--source-recent-file consult--source-project-recent-file
+   consult-source-bookmark consult-source-file-register
+   consult-source-recent-file consult-source-project-recent-file
    ;; :preview-key "M-."
    :preview-key '(:debounce 0.4 any))
   (setq consult-narrow-key "<"))
-
-;; The built-in outline-minor-mode provides structured code folding in modes
-;; such as Emacs Lisp and Python, allowing users to collapse and expand sections
-;; based on headings or indentation levels. This feature enhances navigation and
-;; improves the management of large files with hierarchical structures.
-(use-package outline
-  :diminish outline-minor-mode
-  :ensure nil
-  :commands outline-minor-mode
-  :hook
-  ((emacs-lisp-mode . outline-minor-mode)
-   ;; Use " ▼" instead of the default ellipsis "..." for folded text to make
-   ;; folds more visually distinctive and readable.
-   (outline-minor-mode
-    .
-    (lambda()
-      (let* ((display-table (or buffer-display-table (make-display-table)))
-             (face-offset (* (face-id 'shadow) (ash 1 22)))
-             (value (vconcat (mapcar (lambda (c) (+ face-offset c)) " ▼"))))
-        (set-display-table-slot display-table 'selective-display value)
-        (setq buffer-display-table display-table))))))
-
-;; The outline-indent Emacs package provides a minor mode that enables code
-;; folding based on indentation levels.
-;;
-;; In addition to code folding, *outline-indent* allows:
-;; - Moving indented blocks up and down
-;; - Indenting/unindenting to adjust indentation levels
-;; - Inserting a new line with the same indentation level as the current line
-;; - Move backward/forward to the indentation level of the current line
-;; - and other features.
-(use-package outline-indent
-  :ensure t
-  :commands outline-indent-minor-mode
-
-  :custom
-  (outline-indent-ellipsis " ▼")
-
-  :init
-  ;; The minor mode can also be automatically activated for a certain modes.
-  (add-hook 'python-mode-hook #'outline-indent-minor-mode)
-  (add-hook 'python-ts-mode-hook #'outline-indent-minor-mode)
-
-  (add-hook 'yaml-mode-hook #'outline-indent-minor-mode)
-  (add-hook 'yaml-ts-mode-hook #'outline-indent-minor-mode))
 
 (mapc #'disable-theme custom-enabled-themes)  ; Disable all active themes
 (load-theme 'whiteboard t)                    ; Load the built-in theme
@@ -385,7 +369,7 @@
   ;; - Non-nil to only delete whitespace when the buffer is clean initially.
   ;; (The initial cleanliness check is performed when `stripspace-local-mode'
   ;; is enabled.)
-  (stripspace-only-if-initially-clean nil)
+  (stripspace-only-if-initially-clean t)
 
   ;; Enabling `stripspace-restore-column' preserves the cursor's column position
   ;; even after stripping spaces. This is useful in scenarios where you add
@@ -401,38 +385,6 @@
              eglot-rename
              eglot-format-buffer))
 
-;; The easysession Emacs package is a session manager for Emacs that can persist
-;; and restore file editing buffers, indirect buffers/clones, Dired buffers,
-;; windows/splits, the built-in tab-bar (including tabs, their buffers, and
-;; windows), and Emacs frames. It offers a convenient and effortless way to
-;; manage Emacs editing sessions and utilizes built-in Emacs functions to
-;; persist and restore frames.
-(use-package easysession
-  :diminish easysession-save-mode
-  :ensure t
-  :commands (easysession-switch-to
-             easysession-save-as
-             easysession-save-mode
-             easysession-load-including-geometry)
-
-  :custom
-  (easysession-mode-line-misc-info t)  ; Display the session in the modeline
-  (easysession-save-interval (* 10 60))  ; Save every 10 minutes
-
-  :init
-  ;; Key mappings:
-  ;; C-c l for switching sessions
-  ;; and C-c s for saving the current session
-  (global-set-key (kbd "C-c l") 'easysession-switch-to)
-  (global-set-key (kbd "C-c s") 'easysession-save-as)
-
-  ;; The depth 102 and 103 have been added to to `add-hook' to ensure that the
-  ;; session is loaded after all other packages. (Using 103/102 is particularly
-  ;; useful for those using minimal-emacs.d, where some optimizations restore
-  ;; `file-name-handler-alist` at depth 101 during `emacs-startup-hook`.)
-  (add-hook 'emacs-startup-hook #'easysession-load-including-geometry 102)
-  (add-hook 'emacs-startup-hook #'easysession-save-mode 103))
-
 ;; Org mode is a major mode designed for organizing notes, planning, task
 ;; management, and authoring documents using plain text with a simple and
 ;; expressive markup syntax. It supports hierarchical outlines, TODO lists,
@@ -444,9 +396,9 @@
   :mode
   ("\\.org\\'" . org-mode)
   :bind
-  ("C-c L" . #'org-store-link)
-  ("C-c A" . #'org-agenda)
-  ("C-c C" . #'org-capture)
+  ("C-c l" . #'org-store-link)
+  ("C-c a" . #'org-agenda)
+  ("C-c c" . #'org-capture)
   :custom
   (org-hide-leading-stars t)
   (org-startup-indented t)
@@ -484,37 +436,6 @@
              markdown-toc--toc-already-present-p)
   :custom
   (markdown-toc-header-toc-title "**Table of Contents**"))
-
-;; ;; Tree-sitter in Emacs is an incremental parsing system introduced in Emacs 29
-;; ;; that provides precise, high-performance syntax highlighting. It supports a
-;; ;; broad set of programming languages, including Bash, C, C++, C#, CMake, CSS,
-;; ;; Dockerfile, Go, Java, JavaScript, JSON, Python, Rust, TOML, TypeScript, YAML,
-;; ;; Elisp, Lua, Markdown, and many others.
-;; (use-package treesit-auto
-;;   :ensure t
-;;   :custom
-;;   (treesit-auto-install 'prompt)
-;;   :config
-;;   (treesit-auto-add-to-auto-mode-alist 'all)
-;;   (global-treesit-auto-mode))
-
-(use-package buffer-terminator
-  :diminish buffer-terminator-mode
-  :ensure t
-  :custom
-  ;; Enable/Disable verbose mode to log buffer cleanup events
-  (buffer-terminator-verbose nil)
-
-  ;; Set the inactivity timeout (in seconds) after which buffers are considered
-  ;; inactive (default is 30 minutes):
-  (buffer-terminator-inactivity-timeout (* 30 60)) ; 30 minutes
-
-  ;; Define how frequently the cleanup process should run (default is every 10
-  ;; minutes):
-  (buffer-terminator-interval (* 10 60)) ; 10 minutes
-
-  :config
-  (buffer-terminator-mode 1))
 
 ;; Apheleia is an Emacs package designed to run code formatters (e.g., Shfmt,
 ;; Black and Prettier) asynchronously without disrupting the cursor position.
@@ -581,13 +502,6 @@
   :hook
   (emacs-lisp-mode . aggressive-indent-mode))
 
-;; Highlights function and variable definitions in Emacs Lisp mode
-(use-package highlight-defined
-  :ensure t
-  :commands highlight-defined-mode
-  :hook
-  (emacs-lisp-mode . highlight-defined-mode))
-
 ;; Prevent parenthesis imbalance
 (use-package paredit
   :ensure t
@@ -601,13 +515,13 @@
     fennel-mode)
    . paredit-mode))
 
-;; Displays visible indicators for page breaks
-(use-package page-break-lines
-  :ensure t
-  :commands (page-break-lines-mode
-             global-page-break-lines-mode)
-  :hook
-  (emacs-lisp-mode . page-break-lines-mode))
+;; ;; Displays visible indicators for page breaks
+;; (use-package page-break-lines
+;;   :ensure t
+;;   :commands (page-break-lines-mode
+;;              global-page-break-lines-mode)
+;;   :hook
+;;   (emacs-lisp-mode . page-break-lines-mode))
 
 ;; Provides functions to find references to functions, macros, variables,
 ;; special forms, and symbols in Emacs Lisp
@@ -634,17 +548,18 @@
 (setq column-number-mode t)
 (setq mode-line-position-column-line-format '("%l:%C"))
 
-;; ;; Set the maximum level of syntax highlighting for Tree-sitter modes
-;; (setq treesit-font-lock-level 4)
-
 (use-package which-key
   :diminish which-key-mode
   :ensure nil ; builtin
   :commands which-key-mode
   :hook (after-init . which-key-mode)
   :custom
-  (which-key-idle-delay 1.5)
-  (which-key-idle-secondary-delay 0.25)
+  ;; Allow C-h to trigger which-key before it is done automatically
+  (which-key-show-early-on-C-h t)
+  ;; make sure which-key doesn't show normally but refreshes quickly after it is
+  ;; triggered.
+  (which-key-idle-delay 10000)
+  (which-key-idle-secondary-delay 0.05)
   (which-key-add-column-padding 1)
   (which-key-max-description-length 40))
 
@@ -673,14 +588,14 @@
 (add-hook 'after-init-hook #'window-divider-mode)
 
 ;; Constrain vertical cursor movement to lines within the buffer
-(setq dired-movement-style 'bounded-files)
+(setq dired-movement-style 'bounded)
 
 (setq wdired-allow-to-change-permissions t)
 
 ;; Dired buffers: Automatically hide file details (permissions, size,
 ;; modification date, etc.) and all the files in the `dired-omit-files' regular
 ;; expression for a cleaner display.
-(add-hook 'dired-mode-hook #'dired-hide-details-mode)
+;; (add-hook 'dired-mode-hook #'dired-hide-details-mode)
 
 (add-hook 'dired-mode-hook
           (lambda ()
@@ -689,19 +604,7 @@
                           (interactive)
                           (find-alternate-file "..")))))
 
-;; ;; Hide files from dired
-;; (setq dired-omit-files (concat "\\`[.]\\'"
-;;                                "\\|\\(?:\\.js\\)?\\.meta\\'"
-;;                                "\\|\\.\\(?:elc|a\\|o\\|pyc\\|pyo\\|swp\\|class\\)\\'"
-;;                                "\\|^\\.DS_Store\\'"
-;;                                "\\|^\\.\\(?:svn\\|git\\)\\'"
-;;                                "\\|^\\.ccls-cache\\'"
-;;                                "\\|^__pycache__\\'"
-;;                                "\\|^\\.project\\(?:ile\\)?\\'"
-;;                                "\\|^flycheck_.*"
-;;                                "\\|^flymake_.*"))
-
-(add-hook 'dired-mode-hook #'dired-omit-mode)
+(setq dired-omit-files "")
 
 ;; dired: Group directories first
 (with-eval-after-load 'dired
@@ -747,7 +650,8 @@
 ;; Stuff I like
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-;; Allows repeating some commands without repeating the full key sequence.
+;; Absolutely useless key that causes problems in GUI mode
+(global-unset-key (kbd "C-z"))
 
 (use-package emacs
   :ensure nil
@@ -769,9 +673,12 @@
   (compilation-filter . ansi-color-compilation-filter)
   ;; (emacs-startup . display-startup-time)
 
+  ;; automatic tag pair editing in sgml, html, etc
+  (sgml-mode . sgml-electric-tag-pair-mode)
+
   :custom
   (show-trailing-whitespace t)
-  ;; (split-width-threshold 100)
+  (split-width-threshold 200)
   (enable-recursive-minibuffers t)
   (custom-file (make-temp-file "emacs-custom"))
   (display-time-24hr-format t)
@@ -782,13 +689,6 @@
   (mode-require-final-newline 'ask)
   (custom-unlispify-tag-names nil)
   (initial-major-mode 'lisp-interaction-mode)
-  ;; Use treesitter modes instead
-  ;; (font-lock-support-mode 'tree-sitter-lock-mode)
-  ;; (major-mode-remap-alist '((bash-mode . bash-ts-mode)
-  ;;                           (c-mode . c-ts-mode)
-  ;;                           (c++-mode . c++-ts-mode)
-  ;;                           (c-or-c++-mode . c-or-c++-ts-mode)
-  ;;                           (python-mode . python-ts-mode)))
 
   :config
 
@@ -826,6 +726,12 @@
 
 (use-package diminish :demand t)
 
+(use-package wgrep
+  :custom
+  (wgrep-auto-save-buffer t)
+  (wgrep-enable-key "r")
+  (wgrep-change-readonly-file t))
+
 (use-package zoom
   :diminish zoom-mode
   :custom
@@ -852,46 +758,294 @@
   ("C-r" . #'phi-search-backward))
 
 (use-package multiple-cursors
-  :custom (mc/always-run-for-all t)
-  :bind ("C-S-c C-S-c" . #'mc/edit-lines))
+  :custom (mc/always-run-for-all t))
 
-(use-package region-bindings-mode
-  :after multiple-cursors
-  :bind (:map region-bindings-mode-map
-              ("a" . 'mc/mark-all-like-this)
-              ("p" . 'mc/mark-previous-like-this)
-              ("n" . 'mc/mark-more-like-this-extended)
-              ("r" . 'mc/mark-all-in-region)
-              ("R" . 'mc/mark-all-in-region-regexp)
-              ("l" . 'mc/edit-lines))
-  :custom (mc/edit-lines-empty-lines 'ignore) ;; still don't know what this does
-  :config (region-bindings-mode-enable))
+;; ;; Cannot work with boon last i checked
+;; (use-package region-bindings-mode
+;;   :after multiple-cursors
+;;   :bind (:map region-bindings-mode-map
+;;               ("a" . 'mc/mark-all-like-this-dwim)
+;;               ("p" . 'mc/mark-previous-like-this)
+;;               ("n" . 'mc/mark-next-like-this)
+;;               ("r" . 'mc/mark-all-in-region-regexp)
+;;               ("l" . 'mc/edit-lines))
+;;   :custom (mc/edit-lines-empty-lines 'ignore) ;; still don't know what this does
+;;   :config (region-bindings-mode-enable))
 
 (use-package expand-region
   :bind
   ("C-=" . 'er/expand-region)
   ("C-+" . 'er/contract-region))
 
-(use-package vc-jj :defer t)
+(use-package eldoc-box)
 
-;; Is this necessary?
-(use-package flycheck
-  :ensure nil
-  :after flycheck-clj-kondo
+;; (use-package meow
+;;   :after eldoc-box
+;;   :bind (:map meow-insert-state-keymap
+;;               ("C-g" . 'meow-insert-exit))
+;;   :config
+;;   (defun meow-ergo-setup ()
+;;     ;; -------------------- ;;
+;;     ;;      THING TABLE     ;;
+;;     ;; -------------------- ;;
+;;     (meow-thing-register 'angle
+;;                          '(pair ("<") (">"))
+;;                          '(pair ("<") (">")))
+;;
+;;     (setq meow-char-thing-table
+;;           '((?f . round)
+;;             (?d . square)
+;;             (?s . curly)
+;;             (?a . angle)
+;;             (?r . string)
+;;             (?v . paragraph)
+;;             (?c . line)
+;;             (?x . buffer)
+;;
+;;             (?V . sentence)
+;;             (?C . visual-line)
+;;             (?e . defun)))
+;;
+;;     ;; -------------------- ;;
+;;     ;;       MAPPINGS       ;;
+;;     ;; -------------------- ;;
+;;     (meow-define-keys 'normal
+;;                                         ; expansion
+;;       '("0" . meow-expand-0)
+;;       '("1" . meow-expand-1)
+;;       '("2" . meow-expand-2)
+;;       '("3" . meow-expand-3)
+;;       '("4" . meow-expand-4)
+;;       '("5" . meow-expand-5)
+;;       '("6" . meow-expand-6)
+;;       '("7" . meow-expand-7)
+;;       '("8" . meow-expand-8)
+;;       '("9" . meow-expand-9)
+;;       '("'" . meow-reverse)
+;;
+;;                                         ; movement
+;;       '("i" . meow-prev)
+;;       '("k" . meow-next)
+;;       '("j" . meow-left)
+;;       '("l" . meow-right)
+;;
+;;       '("y" . meow-search)
+;;       '("/" . meow-visit)
+;;
+;;       '("D" . xref-find-definitions)
+;;       '("F" . xref-find-references)
+;;
+;;       '("Q" . meow-quit)
+;;       '("{" . flymake-goto-prev-error)
+;;       '("}" . flymake-goto-next-error)
+;;                                         ; expansion
+;;       '("I" . meow-prev-expand)
+;;       '("K" . meow-next-expand)
+;;       '("J" . meow-left-expand)
+;;       '("L" . meow-right-expand)
+;;
+;;       '("u" . meow-back-word)
+;;       '("U" . meow-back-symbol)
+;;       '("o" . meow-next-word)
+;;       '("O" . meow-next-symbol)
+;;
+;;       '("a" . meow-mark-word)
+;;       '("A" . meow-mark-symbol)
+;;       '("s" . meow-line)
+;;       '("S" . meow-goto-line)
+;;       '("w" . meow-block)
+;;       '("q" . meow-join)
+;;       '("g" . meow-grab)
+;;       '("G" . meow-pop-grab)
+;;       '("m" . meow-swap-grab)
+;;       '("M" . meow-sync-grab)
+;;       '("p" . meow-cancel-selection)
+;;       '("P" . meow-pop-selection)
+;;
+;;       '("x" . meow-till)
+;;       '("z" . meow-find)
+;;
+;;       '("," . meow-beginning-of-thing)
+;;       '("." . meow-end-of-thing)
+;;       '("<" . meow-inner-of-thing)
+;;       '(">" . meow-bounds-of-thing)
+;;
+;;                                         ; editing
+;;       '("d" . meow-kill)
+;;       '("f" . meow-change)
+;;       '("t" . meow-delete)
+;;       '("c" . meow-save)
+;;       '("C" . meow-replace)
+;;       '("v" . meow-yank)
+;;       '("V" . meow-yank-pop)
+;;
+;;       '("e" . meow-insert)
+;;       '("E" . meow-open-above)
+;;       '("r" . meow-append)
+;;       '("R" . meow-open-below)
+;;
+;;       '("h" . meow-undo)
+;;       '("H" . meow-undo-in-selection)
+;;
+;;       ;; '("h" . undo-only)
+;;       ;; '("H" . undo-redo)
+;;
+;;       '("b" . open-line)
+;;       '("B" . split-line)
+;;       '("[" . indent-rigidly-left-to-tab-stop)
+;;       '("]" . indent-rigidly-right-to-tab-stop)
+;;
+;;                                         ; prefix n
+;;       '("nf" . meow-comment)
+;;       '("nt" . meow-start-kmacro-or-insert-counter)
+;;       '("nr" . meow-start-kmacro)
+;;       '("ne" . meow-end-or-call-kmacro)
+;;       ;; ...etc
+;;
+;;                                         ; prefix ;
+;;       '(";f" . save-buffer)
+;;       '(";F" . save-some-buffers)
+;;       '(";d" . meow-query-replace-regexp)
+;;       '(";l" . eldoc-box-help-at-point)
+;;       '(";L" . eldoc)
+;;       '(";a" . eglot-code-actions)
+;;       ;; ... etc
+;;
+;;                                         ; ignore escape
+;;       '("<escape>" . ignore)))
+;;
+;;   (defun meow-setup ()
+;;     (setq meow-cheatsheet-layout meow-cheatsheet-layout-qwerty)
+;;     ;; (meow-motion-overwrite-define-key
+;;     ;;  '("j" . meow-next)
+;;     ;;  '("k" . meow-prev)
+;;     ;;  '("<escape>" . ignore))
+;;     (meow-thing-register 'angle
+;;                          '(pair ("<") (">"))
+;;                          '(pair ("<") (">")))
+;;     (setq meow-char-thing-table
+;;           '((?\( . round)
+;;             (?\[ . square)
+;;             (?{ . curly)
+;;             (?< . angle)
+;;             (?s . string)
+;;             (?p . paragraph)
+;;             (?l . line)
+;;             (?b . buffer)
+;;             (?. . sentence)
+;;             (?v . visual-line)
+;;             (?f . defun)))
+;;     (meow-leader-define-key
+;;      ;; Use SPC (0-9) for digit arguments.
+;;      '("1" . meow-digit-argument)
+;;      '("2" . meow-digit-argument)
+;;      '("3" . meow-digit-argument)
+;;      '("4" . meow-digit-argument)
+;;      '("5" . meow-digit-argument)
+;;      '("6" . meow-digit-argument)
+;;      '("7" . meow-digit-argument)
+;;      '("8" . meow-digit-argument)
+;;      '("9" . meow-digit-argument)
+;;      '("0" . meow-digit-argument)
+;;      '("/" . meow-keypad-describe-key)
+;;      '("?" . meow-cheatsheet))
+;;     (meow-normal-define-key
+;;      '("0" . meow-expand-0)
+;;      '("9" . meow-expand-9)
+;;      '("8" . meow-expand-8)
+;;      '("7" . meow-expand-7)
+;;      '("6" . meow-expand-6)
+;;      '("5" . meow-expand-5)
+;;      '("4" . meow-expand-4)
+;;      '("3" . meow-expand-3)
+;;      '("2" . meow-expand-2)
+;;      '("1" . meow-expand-1)
+;;      '("-" . negative-argument)
+;;      '(";" . meow-reverse)
+;;      '("," . meow-inner-of-thing)
+;;      '("." . meow-bounds-of-thing)
+;;      '("[" . meow-beginning-of-thing)
+;;      '("]" . meow-end-of-thing)
+;;      '("{" . flymake-goto-prev-error)
+;;      '("}" . flymake-goto-next-error)
+;;      '("a" . meow-append)
+;;      '("A" . meow-open-below)
+;;      '("b" . meow-back-word)
+;;      '("B" . meow-back-symbol)
+;;      '("c" . meow-change)
+;;      '("d" . meow-delete)
+;;      '("D" . meow-backward-delete)
+;;      '("e" . meow-next-word)
+;;      '("E" . meow-next-symbol)
+;;      '("f" . meow-find)
+;;      '("g" . meow-cancel-selection)
+;;      '("G" . meow-grab)
+;;      '("h" . meow-left)
+;;      '("H" . meow-left-expand)
+;;      '("i" . meow-insert)
+;;      '("I" . meow-open-above)
+;;      '("j" . meow-next)
+;;      '("J" . meow-next-expand)
+;;      '("k" . meow-prev)
+;;      '("K" . meow-prev-expand)
+;;      '("l" . meow-right)
+;;      '("L" . meow-right-expand)
+;;      '("m" . meow-join)
+;;      '("n" . meow-search)
+;;      '("o" . meow-block)
+;;      '("O" . meow-to-block)
+;;      '("p" . meow-yank)
+;;      '("q" . meow-quit)
+;;      '("Q" . meow-goto-line)
+;;      '("r" . meow-replace)
+;;      '("R" . meow-swap-grab)
+;;      '("s" . meow-kill)
+;;      '("t" . meow-till)
+;;      '("u" . meow-undo)
+;;      '("U" . meow-undo-in-selection)
+;;      '("v" . meow-visit)
+;;      '("w" . meow-mark-word)
+;;      '("W" . meow-mark-symbol)
+;;      '("x" . meow-line)
+;;      '("X" . meow-goto-line)
+;;      '("y" . meow-save)
+;;      '("Y" . meow-sync-grab)
+;;      '("z" . meow-pop-selection)
+;;      '("'" . repeat)
+;;      '("<escape>" . ignore)
+;;      '("/" . xref-find-definitions)
+;;      '("?" . xref-find-references)))
+;;
+;;   (require 'meow)
+;;   (meow-ergo-setup)
+;;   (meow-global-mode 1))
+
+;; (use-package back-button
+;;   :bind (("C-<" . 'back-button-global-backward)
+;;          ("C->" . 'back-button-global-forward)
+;;          ("C-M-<" . 'back-button-local-backward)
+;;          ("C-M->" . 'back-button-local-forward))
+;;   :config
+;;   (back-button-mode 1))
+
+(use-package avy)
+
+(use-package swiper)
+
+(use-package boon
+  :after swiper
+  :bind (:map boon-insert-map ("C-g" . 'boon-set-command-state)
+              :map boon-command-map ("r" . 'swiper))
   :config
-  (flycheck-mode 1))
+  (require 'boon-qwerty)
+  (boon-mode))
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Mode specific stuff
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(use-package lsp-mode :defer t)
+
+(use-package vc-jj :defer t)
 
 ;; For copying org-mode contents into Confluence
 (use-package ox-clip :after org :defer t)
-(use-package org-transclusion
-  ;; :bind (("S-<f12>" . org-transclusion-add)
-  ;;        ("C-c t m" . org-transclusion-transient-menu)
-  ;;        ("C-n t t") . org-transclusion-mode)
-  )
 
 (use-package markdown-mode :defer t)
 (use-package toml-mode :defer t)
@@ -914,9 +1068,27 @@
 
 (use-package kotlin-mode :defer t)
 
-(use-package docker
-  :ensure t
-  ;; :bind ("C-c d" . docker)
-  )
+(use-package docker :ensure t)
 
 (use-package fennel-mode :defer t)
+
+(use-package typescript-mode :defer t)
+
+(use-package geiser :defer t)
+(use-package geiser-mit :defer t)
+(use-package geiser-gambit :defer t)
+
+(use-package elpy :defer t)
+
+(use-package wgrep :defer t)
+
+(use-package jtsx :defer t)
+
+(use-package gptel :defer t
+  :custom
+  (gptel-default-mode 'org-mode)
+  :config
+  (when (file-exists-p "~/.emacs.d/llm.el")
+    (load "~/.emacs.d/llm.el")))
+
+(use-package gptel-magit :defer t)
